@@ -5,7 +5,7 @@
 #load packages
 library(tidyverse)
 library(ggplot2)
-library(ggeffects)
+library(emmeans)
 library(glmmTMB)
 library(DHARMa)
 library(performance)
@@ -171,43 +171,61 @@ model_output_tibble <- model_output_tibble |> select(model, everything())
 write.csv(model_output_tibble, "binary_behav_stats.csv")
 
 
+# GRAPH building
 
 
+# Generate predictions for each model
+
+# Create a function to get predicted probabilities for a model
+get_pred <- function(model, response_name) {
+  # SPECIES varies, TREATMENT fixed at "hawk", other covariates averaged
+  #(including weighted mean of SEASON)
+  emm <- emmeans(model, ~ SPECIES, at = list(TREATMENT = "HAWK"))
+  
+  # Convert to data frame with predicted probabilities and 95% CI
+  emm_df <- summary(emm, type = "response") |> 
+    as.data.frame() |> 
+    mutate(response = response_name)
+  
+  return(emm_df)
+}
+
+# Apply to all four models
+pred_alarm    <- get_pred(m.alarm, "ALARM")
+pred_mob      <- get_pred(m.mob, "MOB")
+pred_interest <- get_pred(m.interest, "INTEREST")
+pred_flee     <- get_pred(m.flee, "FLEE")
+
+# Combine all into one table
+predictions_table <- bind_rows(pred_alarm, pred_mob, pred_interest, pred_flee)
+
+# View
+predictions_table
 
 
+# graphing time
+predictions_table <- predictions_table |> 
+  mutate(panel_label = factor(response, 
+                              levels = c("ALARM", "MOB", "INTEREST", "FLEE"),
+                              labels = c("a)", "b)", "c)", "d)")))
+predictions_table <- predictions_table |>
+  filter(response != "FLEE")
 
 
+sig_df <- data.frame(
+  response = factor(c("ALARM", "MOB", "INTEREST"),
+                    levels = levels(predictions_table$response)),
+  SPECIES = c("ISSJ", "ISSJ", "ISSJ"),  # which species the sig applies to
+  y = c(0.77, 0.07, 0.37),                 # y position above the points
+  label = c("*", "*", "*")              # significance
+)
 
-
-
-
-
-
-
-
-
-
-all_pred <- merge(all_pred, labels, by = "MODEL")
-ggplot(all_pred, aes(x = SPECIES, y = pred_prob, color = SPECIES)) +
-  geom_point(size = 2) +
-  geom_errorbar(data = subset(all_pred, MODEL != "Model 4"),  # exclude model 4
-                aes(ymin = lower, ymax = upper),
-                width = 0.2) +
-  geom_text(
-    aes(label = PANEL_LABEL),
-    x = -Inf,  # far left
-    y = 1.0,  # just above top of y-axis (adjust as needed)
-    hjust = -.5, # nudges left
-    vjust = 1,
-    inherit.aes = FALSE) +
-  facet_wrap(~ MODEL) +
-  ylim(0,1) +
-  labs(
-    x = "Species",
-    y = "Predicted Probability of Behaviour"
-  ) +
-  theme_classic() +
-  theme(strip.text = element_blank(), 
-        panel.border = element_rect(color = "black", fill = NA, size = 1))
-
-
+ggplot(predictions_table, aes(x = response, y = prob, shape = SPECIES, 
+                              group = SPECIES, color = SPECIES)) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymin = prob - SE, ymax = prob + SE), width = 0.2, linewidth = 0.75) +
+  geom_text(data = sig_df, aes(x = response, y = y, label = label),
+            inherit.aes = FALSE, size = 6) +
+  labs(x = "Behaviour", y = "Predicted probability", color = "Species", shape = "Species") +
+  theme_classic(base_size = 14) +
+  guides(color = guide_legend("Species"), shape = guide_legend("Species"))
