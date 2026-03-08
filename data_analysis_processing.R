@@ -50,8 +50,9 @@ sjdf_clean <- sjdf_clean |> #fix class of variables
 
 ### data analysis
 
-sjdf_clean$TREATMENT <- relevel(sjdf_clean$TREATMENT, ref = "HAWK") #make hawk
+sjdf_clean$TREATMENT <- relevel(sjdf_clean$TREATMENT, ref = "HAWK")#make hawk
 #the reference level for model estimates
+sjdf_clean$SPECIES <- relevel(sjdf_clean$SPECIES, ref = "ISSJ")
 
 sjdf_clean <- sjdf_clean |> #mutate the group size and hypotenuse variables to 
   #standardize
@@ -62,7 +63,7 @@ sjdf_clean <- sjdf_clean |> #mutate the group size and hypotenuse variables to
 #alarm occurrence model
 m.alarm <- glmer(ALARM ~  SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
                  SEASON +
-                 (1 | SITE),
+                 (1 | SUBSITE),
                data = sjdf_clean,
                family = binomial)  
 
@@ -84,7 +85,7 @@ pred_data_alarm <- data.frame(
   PLAYBACK  = "YES",               
   GROUP.SIZE   = 0,                 # scaled mean
   HYPOTENUSE  = 0,                  # scaled mean
-  SITE = NA                          # random effect ignored
+  SUBSITE = NA                          # random effect ignored
 )
 
 # Predicted log-odds and standard errors
@@ -102,7 +103,7 @@ pred_data_alarm$upper <- plogis(pred_link_alarm$fit + 1.96 * pred_link_alarm$se.
 #mob occurrence model
 m.mob <- glmer(MOB ~  SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
                    SEASON +
-                   (1 | SITE),
+                   (1 | SUBSITE),
                  data = sjdf_clean,
                  family = binomial)  
 
@@ -125,7 +126,7 @@ pred_data_mob <- data.frame(
   PLAYBACK  = "YES",               
   GROUP.SIZE   = 0,                 # scaled mean
   HYPOTENUSE  = 0,                  # scaled mean
-  SITE = NA                          # random effect ignored
+  SUBSITE = NA                          # random effect ignored
 )
 
 # Predicted log-odds and standard errors
@@ -143,7 +144,7 @@ pred_data_mob$upper <- plogis(pred_link_mob$fit + 1.96 * pred_link_mob$se.fit)  
 #flee occurrence model
 m.flee <- glmer(FLEE ~  SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
                    SEASON +
-                   (1 | SITE),
+                   (1 | SUBSITE),
                  data = sjdf_clean,
                  family = binomial)  
 
@@ -166,7 +167,7 @@ pred_data_flee <- data.frame(
   PLAYBACK  = "YES",               
   GROUP.SIZE   = 0,                 # scaled mean
   HYPOTENUSE  = 0,                  # scaled mean
-  SITE = NA                          # random effect ignored
+  SUBSITE = NA                          # random effect ignored
 )
 
 # Predicted log-odds and standard errors
@@ -184,7 +185,7 @@ pred_data_flee$upper <- plogis(pred_link_flee$fit + 1.96 * pred_link_flee$se.fit
 #interest occurrence model
 m.interest <- glmer(INTEREST ~  SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
                    SEASON +
-                   (1 | SITE),
+                   (1 | SUBSITE),
                  data = sjdf_clean,
                  family = binomial)  
 
@@ -196,7 +197,7 @@ testZeroInflation(sim.m.interest)
 testOutliers(sim.m.interest) 
 
 summary(m.interest) # get model output
-exp(fixef(m.interest) #get odds-ratios
+exp(fixef(m.interest)) #get odds-ratios
 
 
 
@@ -208,7 +209,7 @@ pred_data_interest <- data.frame(
   PLAYBACK  = "YES",               
   GROUP.SIZE   = 0,                 # scaled mean
   HYPOTENUSE  = 0,                  # scaled mean
-  SITE = NA                          # random effect ignored
+  SUBSITE = NA                          # random effect ignored
 )
 
 # Predicted log-odds and standard errors
