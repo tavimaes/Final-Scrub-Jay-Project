@@ -206,18 +206,23 @@ predictions_table
 # graphing time
 predictions_table <- predictions_table |> 
   mutate(panel_label = factor(response, 
-                              levels = c("ALARM", "MOB", "INTEREST", "FLEE"),
+                              levels = c("Alarm", "Mob", "Interest", "FLEE"),
                               labels = c("a)", "b)", "c)", "d)")))
 predictions_table <- predictions_table |>
   filter(response != "FLEE")
 
 
+predictions_table <- predictions_table %>%
+  mutate(response = recode(response,
+                           "ALARM" = "Alarm",
+                           "MOB" = "Mob",
+                           "INTEREST" = "Interest"))
+
 sig_df <- data.frame(
-  response = factor(c("ALARM", "MOB", "INTEREST"),
-                    levels = levels(predictions_table$response)),
-  SPECIES = c("ISSJ", "ISSJ", "ISSJ"),  # which species the sig applies to
-  y = c(0.77, 0.07, 0.37),                 # y position above the points
-  label = c("*", "*", "*")              # significance
+  response = c("Alarm", "Mob", "Interest"),  # character vector
+  SPECIES = c("ISSJ", "ISSJ", "ISSJ"),
+  y = c(0.77, 0.07, 0.37),
+  label = c("*", "*", "*")
 )
 
 ggplot(predictions_table, aes(x = response, y = prob, shape = SPECIES, 
@@ -229,3 +234,8 @@ ggplot(predictions_table, aes(x = response, y = prob, shape = SPECIES,
   labs(x = "Behaviour", y = "Predicted probability", color = "Species", shape = "Species") +
   theme_classic(base_size = 14) +
   guides(color = guide_legend("Species"), shape = guide_legend("Species"))
+
+
+ggsave("fig1.png", last_plot(), width = 8, height = 5, dpi = 300)
+
+
