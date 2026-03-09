@@ -218,6 +218,7 @@ ggplot(predictions_table_facet, aes(x = behavior, y = response, shape = SPECIES,
   theme(strip.text = element_blank())
 
 
+ggsave("fig2.png", last_plot(), width = 8, height = 5, dpi = 300)
 
 
 
