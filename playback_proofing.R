@@ -86,6 +86,73 @@ summary(m.interest)
 
 
 
-
-
 #playback has no effect on our behavior probability repsonses.
+
+
+
+# now check if playback affects alarm call counts or latency
+
+#check alarm counts
+m.alarm.call <- glmmTMB(NUMBER.ALARM ~ PLAYBACK + GROUP.SIZE + HYPOTENUSE +
+                          (1 | SUBSITE),
+                        ziformula = ~1,
+                        data = sjdf_clean, 
+                        family = nbinom2()
+)
+
+check_collinearity(m.alarm.call) #check for colinearity between predictors
+
+sim.m.alarm.call <- simulateResiduals(fittedModel = m.alarm.call) #check model fit
+testDispersion(sim.m.alarm.call)
+testZeroInflation(sim.m.alarm.call)
+testOutliers(sim.m.alarm.call) 
+
+summary(m.alarm.call)
+#no
+
+#check mob counts
+m.mob.call <- glmmTMB(NUMBER.MOB ~ PLAYBACK + GROUP.SIZE + HYPOTENUSE +
+                        (1 | SUBSITE),
+                      ziformula = ~0,
+                      data = sjdf_mob, 
+                      family = nbinom2()
+)
+
+check_collinearity(m.mob.call) # check for collinearity between predictors
+
+sim.m.mob.call <- simulateResiduals(fittedModel = m.mob.call) # check model fit
+testDispersion(sim.m.mob.call)
+testZeroInflation(sim.m.mob.call)
+testOutliers(sim.m.mob.call) 
+
+summary(m.mob.call)
+
+#no
+
+
+#last check latency
+
+m.latency <- glmmTMB(LATENCY.ALARM ~ PLAYBACK + GROUP.SIZE + HYPOTENUSE +
+                       (1 | SUBSITE),
+                     family = gaussian(link = "log"),
+                     data = sjdf_clean)
+
+check_collinearity(m.latency) # check for collinearity between predictors
+
+sim.m.latency <- simulateResiduals(fittedModel = m.latency) # check model fit
+testDispersion(sim.m.latency)
+testZeroInflation(sim.m.latency)
+testOutliers(sim.m.latency) 
+
+
+summary(m.latency)
+
+#no
+
+
+#we can conclude that playback has no effect on our measured behaviors
+
+
+
+
+
