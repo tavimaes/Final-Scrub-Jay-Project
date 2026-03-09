@@ -40,7 +40,7 @@ m.alarm <- glmer(ALARM ~  SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
                    SEASON +
                    (1 | SUBSITE),
                  data = sjdf_clean,
-                 family = binomial)  
+                 family = binomial) 
 
 check_collinearity(m.alarm) #check for colinearity between predictors
 
