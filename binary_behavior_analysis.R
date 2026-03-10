@@ -212,28 +212,63 @@ predictions_table <- predictions_table |>
   filter(response != "FLEE")
 
 
+
+
 predictions_table <- predictions_table %>%
   mutate(response = recode(response,
                            "ALARM" = "Alarm",
                            "MOB" = "Mob",
                            "INTEREST" = "Interest"))
 
+sjdf_issj <- sjdf_clean |>
+  filter(TREATMENT == "HAWK") |>
+  filter(SPECIES == "ISSJ")
+
+sjdf_casj <- sjdf_clean |>
+  filter(TREATMENT == "HAWK") |>
+  filter(SPECIES == "CASJ")
+
+issj_alarm_mean <- mean(sjdf_issj$ALARM)
+casj_alarm_mean <- mean(sjdf_casj$ALARM)
+issj_mob_mean <- mean(sjdf_issj$MOB)
+casj_mob_mean <- mean(sjdf_casj$MOB)
+issj_interest_mean <- mean(sjdf_issj$INTEREST)
+casj_interest_mean <- mean(sjdf_casj$INTEREST)
+
+raw_data <- data.frame(
+  response = c("Alarm", "Alarm", "Mob","Mob", "Interest", "Interest"), 
+  mean = c(issj_alarm_mean, casj_alarm_mean, issj_mob_mean,
+           casj_mob_mean, issj_interest_mean, casj_interest_mean),
+  SPECIES = c("ISSJ", "CASJ", "ISSJ", "CASJ", "ISSJ", "CASJ")
+)
+
 sig_df <- data.frame(
-  response = c("Alarm", "Mob", "Interest"),  # character vector
+  response = c("Alarm", "Mob", "Interest"),  
   SPECIES = c("ISSJ", "ISSJ", "ISSJ"),
   y = c(0.77, 0.07, 0.37),
   label = c("*", "*", "*")
 )
 
+
+
 ggplot(predictions_table, aes(x = response, y = prob, shape = SPECIES, 
                               group = SPECIES, color = SPECIES)) +
+  geom_point(data = raw_data, aes(x = response, y = mean), 
+             show.legend = FALSE,
+             color = "darkgray",
+             position = position_nudge(x = 0.2),
+             size = 4) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymin = prob - SE, ymax = prob + SE), width = 0.2, linewidth = 0.75) +
+  geom_errorbar(aes(ymin = prob - SE, ymax = prob + SE), width = 0.2, 
+                linewidth = 0.75, show.legend = FALSE) +
   geom_text(data = sig_df, aes(x = response, y = y, label = label),
             inherit.aes = FALSE, size = 6) +
-  labs(x = "Behaviour", y = "Predicted probability", color = "Species", shape = "Species") +
+  labs(x = "Behaviour", y = "Predicted probability", color = NULL, shape = NULL) +
+  scale_shape_manual(values = c("ISSJ" = 16, "CASJ" = 1)) +
   theme_classic(base_size = 14) +
-  guides(color = guide_legend("Species"), shape = guide_legend("Species"))
+  scale_color_manual(values = c("red", "darkblue")) +
+  scale_x_discrete(limits = c("Alarm", "Mob", "Interest"))
+  
 
 
 ggsave("fig1.png", last_plot(), width = 8, height = 5, dpi = 300)

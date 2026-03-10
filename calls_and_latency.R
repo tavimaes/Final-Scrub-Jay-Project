@@ -199,24 +199,63 @@ predictions_table_facet <- predictions_table %>%
 
 # plot
 sig_df <- data.frame(
-  behavior = c("Alarming latency (s)", "Mobbing calls"),       # x-axis positions
-  facet_panel = c("Latency", "Call counts"),  # which facet
-  SPECIES = c("ISSJ", "ISSJ"),          # species the asterisk applies to
-  y = c(1.27, -0.0),                    # y position below zero
+  behavior = c("Alarming latency (s)", "Mobbing calls"),       
+  facet_panel = c("Latency", "Call counts"), 
+  SPECIES = c("ISSJ", "ISSJ"),          
+  y = c(1.75, 13),                  
   label = c("*", "*")
 )
 
-ggplot(predictions_table_facet, aes(x = behavior, y = response, shape = SPECIES, color = SPECIES)) +
-  geom_point(size = 4) +
-  geom_errorbar(aes(ymin = response - SE, ymax = response + SE), linewidth = 0.75, width = 0.2) +
-  geom_text(data = sig_df, aes(x = behavior, y = y, label = label),
-            inherit.aes = FALSE, size = 6) +
-  scale_y_continuous(limits = c(-0.0, NA)) +  # extend y-axis below 0 for asterisks
-  facet_wrap(~ facet_panel, scales = "free") +
-  labs(x = "Vocal response", y = "Predicted value", color = "Species", shape = "Species") +
-  theme_classic(base_size = 14) +
-  theme(strip.text = element_blank())
 
+
+raw_data_long <- sjdf_clean |>
+  pivot_longer(
+    cols = c(NUMBER.ALARM, NUMBER.MOB, LATENCY.ALARM),
+    names_to = "behavior",
+    values_to = "value"
+  ) |>
+  filter(TREATMENT != "CONTROL") |>
+  mutate(
+    facet_panel = case_when(
+      behavior == "LATENCY.ALARM"      ~ "Latency",
+      behavior %in% c("NUMBER.ALARM","NUMBER.MOB") ~ "Call counts"
+    ),
+    behavior = recode(behavior,
+                      "NUMBER.ALARM" = "Alarm calls",
+                      "NUMBER.MOB" = "Mobbing calls",
+                      "LATENCY.ALARM" = "Alarming latency (s)")
+      
+  ) |>
+  filter(value != 179)
+
+
+ggplot(predictions_table_facet, aes(x = behavior, y = response, color = SPECIES, shape = SPECIES)) +
+  geom_point(data = raw_data_long,
+             aes(x = behavior, y = value, shape = SPECIES),
+             size = 2,
+             position = position_jitter(height = 0, width = 0.25),
+             color = "darkgray",
+             alpha = 0.6,
+             show.legend = FALSE) +
+  geom_point(size = 4) +
+  geom_errorbar(aes(ymin = response - SE, ymax = response + SE),
+                linewidth = 0.75, width = 0.25, show.legend = FALSE) +
+  geom_text(data = sig_df, aes(x = behavior, y = y, label = label),
+            inherit.aes = FALSE, size = 8) +
+  facet_wrap(~ facet_panel, scales = "free") +
+  scale_shape_manual(values = c("ISSJ" = 16, "CASJ" = 1)) +
+  labs(x = "Vocal response",
+       y = "Predicted value",
+       color = NULL,
+       shape = NULL) +
+  theme_classic(base_size = 14) +
+  theme(strip.text = element_blank()) +
+  scale_color_manual(values = c("red", "darkblue")) +
+  scale_y_continuous(
+    limits = c(0, NA)
+  )
+  
+  
 
 ggsave("fig2.png", last_plot(), width = 8, height = 5, dpi = 300)
 
