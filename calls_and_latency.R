@@ -163,7 +163,7 @@ get_pred <- function(model, response_name) {
   
   emm <- emmeans(model, ~ SPECIES, at = list(TREATMENT = "HAWK"))
   
-  emm_df <- summary(emm, type = "response") |>
+  emm_df <- summary(emm, type = "response", infer = TRUE) |>
     as.data.frame() |>
     mutate(model = response_name)
   
@@ -197,15 +197,6 @@ predictions_table_facet <- predictions_table %>%
     )
   )
 
-# plot
-sig_df <- data.frame(
-  behavior = c("Alarming latency (s)", "Mobbing calls"),       
-  facet_panel = c("Latency", "Call counts"), 
-  SPECIES = c("ISSJ", "ISSJ"),          
-  y = c(1.75, 13),                  
-  label = c("*", "*")
-)
-
 
 
 raw_data_long <- sjdf_clean |>
@@ -229,6 +220,14 @@ raw_data_long <- sjdf_clean |>
   filter(value != 179)
 
 
+sig_df <- data.frame(
+  behavior = c("Alarming latency (s)", "Mobbing calls"),       
+  facet_panel = c("Latency", "Call counts"), 
+  SPECIES = c("ISSJ", "ISSJ"),          
+  y = c(1.96, 18),                  
+  label = c("*", "*")
+)
+
 ggplot(predictions_table_facet, aes(x = behavior, y = response, color = SPECIES, shape = SPECIES)) +
   geom_point(data = raw_data_long,
              aes(x = behavior, y = value, shape = SPECIES),
@@ -238,7 +237,7 @@ ggplot(predictions_table_facet, aes(x = behavior, y = response, color = SPECIES,
              alpha = 0.6,
              show.legend = FALSE) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymin = response - SE, ymax = response + SE),
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
                 linewidth = 0.75, width = 0.25, show.legend = FALSE) +
   geom_text(data = sig_df, aes(x = behavior, y = y, label = label),
             inherit.aes = FALSE, size = 8) +

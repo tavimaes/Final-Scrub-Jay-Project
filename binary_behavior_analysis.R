@@ -183,7 +183,7 @@ get_pred <- function(model, response_name) {
   emm <- emmeans(model, ~ SPECIES, at = list(TREATMENT = "HAWK"))
   
   # Convert to data frame with predicted probabilities and 95% CI
-  emm_df <- summary(emm, type = "response") |> 
+  emm_df <- summary(emm, type = "response", infer = TRUE) |> 
     as.data.frame() |> 
     mutate(response = response_name)
   
@@ -245,7 +245,7 @@ raw_data <- data.frame(
 sig_df <- data.frame(
   response = c("Alarm", "Mob", "Interest"),  
   SPECIES = c("ISSJ", "ISSJ", "ISSJ"),
-  y = c(0.77, 0.07, 0.37),
+  y = c(0.68, 0.03, 0.28),
   label = c("*", "*", "*")
 )
 
@@ -259,7 +259,7 @@ ggplot(predictions_table, aes(x = response, y = prob, shape = SPECIES,
              position = position_nudge(x = 0.2),
              size = 4) +
   geom_point(size = 4) +
-  geom_errorbar(aes(ymin = prob - SE, ymax = prob + SE), width = 0.2, 
+  geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL), width = 0.2, 
                 linewidth = 0.75, show.legend = FALSE) +
   geom_text(data = sig_df, aes(x = response, y = y, label = label),
             inherit.aes = FALSE, size = 6) +
