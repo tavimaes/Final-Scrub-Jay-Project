@@ -26,9 +26,6 @@ sjdf_clean <- sjdf_clean |> #fix class of variables
 
 #Data analysis begins here
 
-#make hawk the reference level for model estimates
-sjdf_clean$TREATMENT <- relevel(sjdf_clean$TREATMENT, ref = "HAWK")
-
 sjdf_clean <- sjdf_clean |> #mutate the group size and hypotenuse variables to 
   #standardize
   mutate(GROUP.SIZE = as.numeric(scale(GROUP.SIZE))) |>
@@ -36,8 +33,7 @@ sjdf_clean <- sjdf_clean |> #mutate the group size and hypotenuse variables to
 
 
 # ALARM occurrence model
-m.alarm <- glmer(ALARM ~  SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
-                   SEASON +
+m.alarm <- glmer(ALARM ~  SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
                    (1 | SUBSITE),
                  data = sjdf_clean,
                  family = binomial) 
@@ -50,80 +46,175 @@ testZeroInflation(sim.m.alarm)
 testOutliers(sim.m.alarm) 
 
 summary(m.alarm) # get model output
-alarm_hypotenuse_est <- tidy(m.alarm) |> filter(term == "HYPOTENUSE")
 
-#rerun model without HYPOTENUSE, it is not significant and removes 7 hawk trials
 
-m.alarm <- glmer(ALARM ~  SPECIES + TREATMENT + GROUP.SIZE +
-                   SEASON +
+#save playback summary stats for alarm
+alarm_playback_est <- tidy(m.alarm) |> filter(term == "PLAYBACKYES") |> 
+  mutate(model = "ALARM")
+
+#rerun model without PLAYBACK, it is not significant. Now we can include SEASON
+
+m.alarm <- glmer(ALARM ~  SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
                    (1 | SUBSITE),
                  data = sjdf_clean,
-                 family = binomial)
+                 family = binomial) 
 
+check_collinearity(m.alarm) #check for colinearity between predictors
+
+sim.m.alarm <- simulateResiduals(fittedModel = m.alarm) #check model fit
+testDispersion(sim.m.alarm)
+testZeroInflation(sim.m.alarm)
+testOutliers(sim.m.alarm) 
+
+summary(m.alarm) # get model output
+
+alarm_hypotenuse_est <- tidy(m.alarm) |> filter(term == "HYPOTENUSE") |> 
+  mutate(model = "ALARM")
+
+#now rerun once more without hypotenuse, it has no significance and removing 
+#allows 7 extra data points to be used
+
+m.alarm <- glmer(ALARM ~  SPECIES*TREATMENT + GROUP.SIZE + SEASON +
+                   (1 | SUBSITE),
+                 data = sjdf_clean,
+                 family = binomial) 
+
+check_collinearity(m.alarm) #check for colinearity between predictors
+
+sim.m.alarm <- simulateResiduals(fittedModel = m.alarm) #check model fit
+testDispersion(sim.m.alarm)
+testZeroInflation(sim.m.alarm)
+testOutliers(sim.m.alarm) 
+
+
+summary(m.alarm) # get model output
+
+
+#get all other stats from final model
 alarm_est <- tidy(m.alarm) |> mutate(model = "ALARM")
 
 
-model_output_tibble <- bind_rows(alarm_est, alarm_hypotenuse_est)
+model_output_tibble <- bind_rows(alarm_est, alarm_hypotenuse_est, 
+                                 alarm_playback_est)
 
 
 # MOB occurrence model
-m.mob <- glmer(MOB ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
-                 SEASON +
+m.mob <- glmer(MOB ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
+                 (1 | SUBSITE),
+               data = sjdf_clean,
+               family = binomial)
+
+check_collinearity(m.mob) # check collinearity between predictors
+
+sim.m.mob <- simulateResiduals(fittedModel = m.mob) # check model fit
+testDispersion(sim.m.mob)
+testZeroInflation(sim.m.mob)
+testOutliers(sim.m.mob)
+
+summary(m.mob) # get model output
+
+# save playback summary stats for MOB
+mob_playback_est <- tidy(m.mob) |> 
+  filter(term == "PLAYBACKYES") |> 
+  mutate(model = "MOB")
+
+# rerun model without PLAYBACK (if not significant), now include SEASON
+m.mob <- glmer(MOB ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
                  (1 | SUBSITE),
                data = sjdf_clean,
                family = binomial)
 
 check_collinearity(m.mob)
-
 sim.m.mob <- simulateResiduals(fittedModel = m.mob)
 testDispersion(sim.m.mob)
 testZeroInflation(sim.m.mob)
 testOutliers(sim.m.mob)
 
 summary(m.mob)
-mob_hypotenuse_est <- tidy(m.mob) |> filter(term == "HYPOTENUSE")
 
-m.mob <- glmer(MOB ~ SPECIES + TREATMENT + GROUP.SIZE +
-                 SEASON +
+mob_hypotenuse_est <- tidy(m.mob) |> 
+  filter(term == "HYPOTENUSE") |> 
+  mutate(model = "MOB")
+
+# rerun final model without HYPOTENUSE if not significant
+m.mob <- glmer(MOB ~ SPECIES*TREATMENT + GROUP.SIZE + SEASON +
                  (1 | SUBSITE),
                data = sjdf_clean,
                family = binomial)
-summary((m.mob))
+
+check_collinearity(m.mob)
+sim.m.mob <- simulateResiduals(fittedModel = m.mob)
+testDispersion(sim.m.mob)
+testZeroInflation(sim.m.mob)
+testOutliers(sim.m.mob)
+
+summary(m.mob)
+
+# get all other stats from final model
 mob_est <- tidy(m.mob) |> mutate(model = "MOB")
 
-model_output_tibble <- bind_rows(model_output_tibble, mob_est, 
-                                 mob_hypotenuse_est)
+model_output_tibble <- bind_rows(model_output_tibble, mob_hypotenuse_est, 
+                               mob_est, mob_playback_est)
+
 
 
 # INTEREST occurrence model
-m.interest <- glmer(INTEREST ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +
-                      SEASON +
+m.interest <- glmer(INTEREST ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
+                      (1 | SUBSITE),
+                    data = sjdf_clean,
+                    family = binomial)
+
+check_collinearity(m.interest)  # check collinearity between predictors
+
+sim.m.interest <- simulateResiduals(fittedModel = m.interest) # check model fit
+testDispersion(sim.m.interest)
+testZeroInflation(sim.m.interest)
+testOutliers(sim.m.interest)
+
+summary(m.interest)  # get model output
+
+# save playback summary stats for INTEREST
+interest_playback_est <- tidy(m.interest) |> 
+  filter(term == "PLAYBACKYES") |> 
+  mutate(model = "INTEREST")
+
+# rerun model without PLAYBACK if not significant, include SEASON
+m.interest <- glmer(INTEREST ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
                       (1 | SUBSITE),
                     data = sjdf_clean,
                     family = binomial)
 
 check_collinearity(m.interest)
-
 sim.m.interest <- simulateResiduals(fittedModel = m.interest)
 testDispersion(sim.m.interest)
 testZeroInflation(sim.m.interest)
 testOutliers(sim.m.interest)
 
 summary(m.interest)
-interest_hypotenuse_est <- tidy(m.interest) |> filter(term == "HYPOTENUSE")
 
-m.interest <- glmer(INTEREST ~ SPECIES + TREATMENT + GROUP.SIZE +
-                      SEASON +
+interest_hypotenuse_est <- tidy(m.interest) |> 
+  filter(term == "HYPOTENUSE") |> 
+  mutate(model = "INTEREST")
+
+# rerun final model without HYPOTENUSE if not significant
+m.interest <- glmer(INTEREST ~ SPECIES*TREATMENT + GROUP.SIZE + SEASON +
                       (1 | SUBSITE),
                     data = sjdf_clean,
                     family = binomial)
 
+check_collinearity(m.interest)
+sim.m.interest <- simulateResiduals(fittedModel = m.interest)
+testDispersion(sim.m.interest)
+testZeroInflation(sim.m.interest)
+testOutliers(sim.m.interest)
+
+summary(m.interest)
+
+# get all other stats from final model
 interest_est <- tidy(m.interest) |> mutate(model = "INTEREST")
 
-model_output_tibble <- bind_rows(model_output_tibble, interest_est, 
-                                 interest_hypotenuse_est)
-
-
+model_output_tibble <- bind_rows(model_output_tibble, interest_hypotenuse_est, 
+                                interest_est, interest_playback_est)
 
 # FLEE occurrence model
 m.flee <- glmer(FLEE ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE +

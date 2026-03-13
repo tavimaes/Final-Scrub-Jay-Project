@@ -224,7 +224,7 @@ sig_df <- data.frame(
   behavior = c("Alarming latency (s)", "Mobbing calls"),       
   facet_panel = c("Latency", "Call counts"), 
   SPECIES = c("ISSJ", "ISSJ"),          
-  y = c(1.96, 18),                  
+  y = c(2.4, 25),                  
   label = c("*", "*")
 )
 
@@ -240,7 +240,7 @@ ggplot(predictions_table_facet, aes(x = behavior, y = response, color = SPECIES,
   geom_errorbar(aes(ymin = asymp.LCL, ymax = asymp.UCL),
                 linewidth = 0.75, width = 0.25, show.legend = FALSE) +
   geom_text(data = sig_df, aes(x = behavior, y = y, label = label),
-            inherit.aes = FALSE, size = 8) +
+            inherit.aes = FALSE, size = 10) +
   facet_wrap(~ facet_panel, scales = "free") +
   scale_shape_manual(values = c("ISSJ" = 16, "CASJ" = 1)) +
   labs(x = "Vocal response",
