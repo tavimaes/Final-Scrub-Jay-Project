@@ -154,8 +154,8 @@ summary(m.mob)
 # get all other stats from final model
 mob_est <- tidy(m.mob) |> mutate(model = "MOB")
 
-model_output_tibble <- bind_rows(model_output_tibble, mob_hypotenuse_est, 
-                               mob_est, mob_playback_est)
+model_output_tibble <- bind_rows(model_output_tibble,  mob_est, mob_hypotenuse_est, 
+                              mob_playback_est)
 
 
 
@@ -214,8 +214,8 @@ summary(m.interest)
 # get all other stats from final model
 interest_est <- tidy(m.interest) |> mutate(model = "INTEREST")
 
-model_output_tibble <- bind_rows(model_output_tibble, interest_hypotenuse_est, 
-                                interest_est, interest_playback_est)
+model_output_tibble <- bind_rows(model_output_tibble, interest_est, interest_hypotenuse_est, 
+                                interest_playback_est)
 
 # FLEE occurrence model
 m.flee <- glmer(FLEE ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
@@ -272,32 +272,86 @@ summary(m.flee)
 # get all other stats from final model
 flee_est <- tidy(m.flee) |> mutate(model = "FLEE")
 
-model_output_tibble <- bind_rows(model_output_tibble, flee_hypotenuse_est, 
-                                 flee_est, flee_playback_est)
+model_output_tibble <- bind_rows(model_output_tibble, flee_est, 
+                                 flee_hypotenuse_est, flee_playback_est)
+
+model_output_tibble_final <- model_output_tibble |>
+  filter(effect != "ran_pars") |>
+  filter(term != "(Intercept)")
+
+
+write_csv(model_output_tibble_final, "binary_behav_stats.csv")
+
 
 
 # GRAPH building
 
-library(ggbeeswarm)
+alarm_df <- emmeans(m.alarm, ~ SPECIES * TREATMENT, type = "response") |>
+  as.data.frame() |>
+  mutate(BEHAVIOR = "ALARM")
+
+mob_df <- emmeans(m.mob, ~ SPECIES * TREATMENT, type = "response") |>
+  as.data.frame() |>
+  mutate(BEHAVIOR = "MOB")
+
+interest_df <- emmeans(m.interest, ~ SPECIES * TREATMENT, type = "response") |>
+  as.data.frame() |>
+  mutate(BEHAVIOR = "INTEREST")
+
+flee_df <- emmeans(m.flee, ~ SPECIES * TREATMENT, type = "response") |>
+  as.data.frame() |>
+  mutate(BEHAVIOR = "FLEE")
+
+pred_df <- bind_rows(alarm_df, mob_df, interest_df, flee_df)
+
+#create facet labels
+label_df <- data.frame(
+  BEHAVIOR = c("ALARM", "MOB", "INTEREST", "FLEE"),
+  label = c("a)", "b)", "c)", "d)"),
+  x = -Inf,
+  y = Inf
+)
+
+#fix error bars where there was no variance
+
+pred_df$asymp.LCL[9] <- 0
+pred_df$asymp.UCL[9] <- 0
+pred_df$asymp.LCL[13] <- 1
+pred_df$asymp.UCL[13] <- 1
+pred_df$asymp.LCL[15] <- 1
+pred_df$asymp.UCL[15] <- 1
+pred_df$asymp.LCL[16] <- 1
+pred_df$asymp.UCL[16] <- 1
+
+#raw data
+raw_df <- sjdf_clean |>
+  pivot_longer(
+    cols = c(ALARM, MOB, INTEREST, FLEE),
+    names_to = "BEHAVIOR",
+    values_to = "RESPONSE"
+  ) |>
+  group_by(SPECIES, TREATMENT, BEHAVIOR) |>
+  summarise(
+    prop = mean(RESPONSE),
+    n = n(),
+    .groups = "drop"
+  )
+
 
 ggplot() +
-  
-  # Replace stat_slab with quasirandom points
-  geom_quasirandom(
-    data = sj_long,
+  # Predicted points
+  geom_col(
+    data = raw_df,
     aes(
       x = SPECIES,
-      y = VALUE,
-      color = TREATMENT,
-      group = TREATMENT
+      y = prop,
+      fill = TREATMENT
     ),
-    dodge.width = 0.6,  
-    width = 0.2,
-    size = 1,
-    alpha = 0.1
+    position = position_dodge(width = 0.6),
+    width = 0.5,
+    alpha = 0.2, show.legend = FALSE   # transparency so predictions show on top
   ) +
   
-  # Predicted points
   geom_point(
     data = pred_df,
     aes(
@@ -323,25 +377,29 @@ ggplot() +
     position = position_dodge(width = 0.6)
   ) +
   
-  # Facet labels
   geom_text(
     data = label_df,
     aes(x = x, y = y, label = label),
     inherit.aes = FALSE,
-    hjust = 0,
-    vjust = 0,
+    hjust = -0.3,   # pushes slightly inside from left
+    vjust = 1.5,    # pushes slightly down from top
     size = 5
   ) +
   
   facet_wrap(~ factor(BEHAVIOR, levels = c("ALARM", "MOB", "INTEREST", "FLEE")),
              ncol = 2) +
   
-  scale_color_manual(values = c("CONTROL" = "gray60",
-                                "HAWK" = "darkblue")) +
-  scale_fill_manual(values = c("CONTROL" = "gray60",
-                               "HAWK" = "darkblue")) +
-  scale_shape_manual(values = c("CONTROL" = 15,
-                                "HAWK" = 17)) +
+  scale_color_manual(
+    name = "Treatment",
+    values = c("CONTROL" = "red", "HAWK" = "darkblue"),
+    labels = c("CONTROL" = "Control", "HAWK" = "Hawk")
+  ) +
+  
+  scale_shape_manual(
+    name = "Treatment",
+    values = c("CONTROL" = 15, "HAWK" = 17),
+    labels = c("CONTROL" = "Control", "HAWK" = "Hawk")
+  ) +
   
   scale_x_discrete(labels = c(
     CASJ = expression(italic("A. californica")),
@@ -351,15 +409,22 @@ ggplot() +
   scale_y_continuous(limits = c(0,1), expand = c(0.02,0.05)) +
   
   theme_classic(base_size = 14) +
-  labs(x = "Species", y = "Probability") +
+  labs(x = "Species", y = "Probability of behavior occurring",
+       color = "Treatment", shape = "Treatment") +
   theme(strip.text = element_blank(),
         strip.background = element_blank(),
-        panel.border = element_rect(color = "black", fill = NA))
+        panel.border = element_rect(color = "black", fill = NA, size = 1.2))
 
 ggsave("fig1.png", last_plot(), width = 7, height = 5, dpi = 300)
 
 
 
+contrast(
+  emmeans(m.alarm, ~ SPECIES * TREATMENT),
+  interaction = "pairwise", type = "response"
+)
 
 
+emm <- emmeans(m.alarm, ~ SPECIES * TREATMENT)
 
+contrast(emm, interaction = "pairwise", type = "response")
