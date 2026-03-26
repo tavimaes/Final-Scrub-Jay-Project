@@ -15,12 +15,15 @@ library(ggeffects)
 #read in data
 sjdf_clean <- read_csv("clean_data.csv")
 
+
 #set variables classes
 sjdf_clean <- sjdf_clean |> #fix class of variables
   mutate(across(c(ALARM, MOB, FLEE, INTEREST, HYPOTENUSE, LATENCY.ALARM, 
                   GROUP.SIZE, NUMBER.MOB, NUMBER.ALARM), as.numeric)) |>
   mutate(across(c(SPECIES, SEASON, PLAYBACK, SITE, SUBSITE, TREATMENT), 
                 as.factor))
+
+sjdf_clean$TREATMENT <- relevel(sjdf_clean$TREATMENT, ref = "CONTROL")
 
 #Data analysis begins here
 
