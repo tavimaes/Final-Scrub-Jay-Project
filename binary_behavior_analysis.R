@@ -80,7 +80,7 @@ m.alarm <- glmer(ALARM ~  SPECIES*TREATMENT + GROUP.SIZE + SEASON +
                  data = sjdf_clean,
                  family = binomial) 
 
-check_collinearity(m.alarm) #check for colinearity between predictors
+check_collinearity(m.alarm) #check for collinearity between predictors
 
 sim.m.alarm <- simulateResiduals(fittedModel = m.alarm) #check model fit
 testDispersion(sim.m.alarm)
@@ -160,7 +160,7 @@ model_output_tibble <- bind_rows(model_output_tibble,  mob_est, mob_hypotenuse_e
 
 
 # INTEREST occurrence model
-m.interest <- glmer(INTEREST ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
+m.interest <- glmer(INTEREST ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
                       (1 | SUBSITE),
                     data = sjdf_clean,
                     family = binomial)
@@ -180,7 +180,7 @@ interest_playback_est <- tidy(m.interest) |>
   mutate(model = "INTEREST")
 
 # rerun model without PLAYBACK if not significant, include SEASON
-m.interest <- glmer(INTEREST ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
+m.interest <- glmer(INTEREST ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
                       (1 | SUBSITE),
                     data = sjdf_clean,
                     family = binomial)
@@ -198,7 +198,7 @@ interest_hypotenuse_est <- tidy(m.interest) |>
   mutate(model = "INTEREST")
 
 # rerun final model without HYPOTENUSE if not significant
-m.interest <- glmer(INTEREST ~ SPECIES*TREATMENT + GROUP.SIZE + SEASON +
+m.interest <- glmer(INTEREST ~ SPECIES + TREATMENT + GROUP.SIZE + SEASON +
                       (1 | SUBSITE),
                     data = sjdf_clean,
                     family = binomial)
@@ -218,7 +218,7 @@ model_output_tibble <- bind_rows(model_output_tibble, interest_est, interest_hyp
                                 interest_playback_est)
 
 # FLEE occurrence model
-m.flee <- glmer(FLEE ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
+m.flee <- glmer(FLEE ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE + PLAYBACK +
                   (1 | SUBSITE),
                 data = sjdf_clean,
                 family = binomial)
@@ -238,7 +238,7 @@ flee_playback_est <- tidy(m.flee) |>
   mutate(model = "FLEE")
 
 # rerun model without PLAYBACK if not significant, include SEASON
-m.flee <- glmer(FLEE ~ SPECIES*TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
+m.flee <- glmer(FLEE ~ SPECIES + TREATMENT + GROUP.SIZE + HYPOTENUSE + SEASON +
                   (1 | SUBSITE),
                 data = sjdf_clean,
                 family = binomial)
@@ -256,7 +256,7 @@ flee_hypotenuse_est <- tidy(m.flee) |>
   mutate(model = "FLEE")
 
 # rerun final model without HYPOTENUSE if not significant
-m.flee <- glmer(FLEE ~ SPECIES*TREATMENT + GROUP.SIZE + SEASON +
+m.flee <- glmer(FLEE ~ SPECIES + TREATMENT + GROUP.SIZE + SEASON +
                   (1 | SUBSITE),
                 data = sjdf_clean,
                 family = binomial)
@@ -314,8 +314,6 @@ label_df <- data.frame(
 
 #fix error bars where there was no variance
 
-pred_df$asymp.LCL[9] <- 0
-pred_df$asymp.UCL[9] <- 0
 pred_df$asymp.LCL[13] <- 1
 pred_df$asymp.UCL[13] <- 1
 pred_df$asymp.LCL[15] <- 1

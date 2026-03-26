@@ -27,8 +27,7 @@ sjdf_clean$TREATMENT <- relevel(sjdf_clean$TREATMENT, ref = "CONTROL")
 
 #Data analysis begins here
 
-#make hawk the reference level for model estimates
-sjdf_clean$TREATMENT <- relevel(sjdf_clean$TREATMENT, ref = "HAWK")
+
 
 sjdf_clean <- sjdf_clean |> #mutate the group size and hypotenuse variables to 
   #standardize
