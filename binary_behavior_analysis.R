@@ -422,7 +422,34 @@ contrast(
   interaction = "pairwise", type = "response"
 )
 
+#----- Post-hoc tests -----------
 
-emm <- emmeans(m.alarm, ~ SPECIES * TREATMENT)
+#test within treatment means
 
-contrast(emm, interaction = "pairwise", type = "response")
+emm.alarm <- emmeans(m.alarm, ~ SPECIES | TREATMENT)
+
+pairs(emm.alarm, type = "response")
+
+emm.mob <- emmeans(m.mob, ~ SPECIES | TREATMENT)
+
+pairs(emm.mob, type = "response")
+
+emm.interest <- emmeans(m.interest, ~ SPECIES | TREATMENT)
+pairs(emm.interest, type = "response")
+
+emm.flee <- emmeans(m.flee, ~ SPECIES | TREATMENT)
+pairs(emm.flee, type = "response")
+
+#test within species means
+
+emm.alarm <- emmeans(m.alarm, ~ TREATMENT | SPECIES)
+pairs(emm.alarm, type = "response")
+
+emm.mob <- emmeans(m.mob, ~ TREATMENT | SPECIES)
+pairs(emm.mob, type = "response")
+
+emm.interest <- emmeans(m.interest, ~ TREATMENT | SPECIES)
+pairs(emm.interest, type = "response")
+
+emm.flee <- emmeans(m.flee, ~ TREATMENT | SPECIES)
+pairs(emm.flee, type = "response")

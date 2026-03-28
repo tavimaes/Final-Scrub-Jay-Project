@@ -496,29 +496,31 @@ ggplot() +
 ggsave("fig2.png", last_plot(), width = 8, height = 5, dpi = 300)
 
 
-# ----- alarm post-hoc ------
-em_alarm <- emmeans(m.alarm.call, ~ SPECIES * TREATMENT)
+# -----post-hoc ------
 
-#differences within species
-alarm_treatment_diff <- contrast(em_alarm, "pairwise", by = "SPECIES", type = "response")  
-alarm_treatment_diff
+emm.alarm.call <- emmeans(m.alarm.call, ~ SPECIES * TREATMENT)
+contrast(emm.alarm.call, interaction = "pairwise", type = "response")
 
-#difference of the differences
-diff_of_diffs_alarm <- contrast(em_alarm, interaction = "trt.vs.ctrl", type = "response" )
-diff_of_diffs_alarm
-
-# ----- MOB post-hoc ------
-
-# Estimated marginal means for SPECIES × TREATMENT
-em_mob <- emmeans(m.mob.call, ~ SPECIES * TREATMENT)
-
-# Differences within each species: (Hawk - Control)
-mob_treatment_diff <- contrast(em_mob, "pairwise", by = "SPECIES", type = "response")
-mob_treatment_diff
-
-# Difference of the differences: (Hawk-Control for ISSJ) - (Hawk-Control for CASJ)
-mob_diff_of_diffs <- contrast(em_mob, interaction = "trt.vs.ctrl", type = "response")
-mob_diff_of_diffs
+emm.mob.call <- emmeans(m.mob.call, ~ SPECIES * TREATMENT)
+contrast(emm.mob.call, interaction = "pairwise", type = "response")
 
 
+
+
+
+emm.alarm2 <- emmeans(m.alarm.call, ~ SPECIES | TREATMENT)
+pairs(emm.alarm2, type = "response")
+
+emm.mob2 <- emmeans(m.mob.call, ~ SPECIES | TREATMENT)
+pairs(emm.mob2, type = "response")
+
+
+
+
+
+emm.alarm3 <- emmeans(m.alarm.call, ~ TREATMENT | SPECIES)
+pairs(emm.alarm3, type = "response")
+
+emm.mob3 <- emmeans(m.mob.call, ~ TREATMENT | SPECIES)
+pairs(emm.mob3, type = "response")
 
