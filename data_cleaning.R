@@ -29,7 +29,8 @@ sjdf_clean <- sjdf_clean %>% #replace missing values with NAs
   mutate(across(everything(), ~na_if(.x, "--"))) |>
   type.convert(as.is = TRUE)
 
-
+sjdf_clean <- sjdf_clean |>
+  filter(NUMBER.MOB != 179)
   
 write_csv(sjdf_clean, "clean_data.csv")
 

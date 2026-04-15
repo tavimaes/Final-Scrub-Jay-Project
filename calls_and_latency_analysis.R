@@ -483,7 +483,7 @@ ggplot() +
   theme_classic(base_size = 14) +
   labs(
     x = "Species",
-    y = "Number of calls"
+    y = "Log call count"
   ) +
   theme(
     strip.text = element_blank(),
