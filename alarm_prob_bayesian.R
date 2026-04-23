@@ -10,6 +10,8 @@ library(dplyr)
 library(brms)
 library(tidybayes)
 library(marginaleffects)
+library(performance)
+library(bayesplot)
 
 #read in clean data
 sjdf_clean <- read_csv("clean_data.csv")
@@ -46,10 +48,9 @@ m_alarm_v1 <- brm(
   chains = 4,
   cores = 4,
   prior = priors,
-  iter = 4000
+  iter = 4000,
+  file = "models/m_alarm_v1"
 )
-
-saveRDS(m_alarm_v1, "models/m_alarm_v1.rds")
 
 #check model convergence
 summary(m_alarm_v1)
@@ -58,7 +59,7 @@ plot(m_alarm_v1)
 #check model fit
 pp_check(m_alarm_v1, type = "bars")
 check_collinearity(m_alarm_v1)
-mcmc_acf(m_alarm_v1)
+
 
 #save playback stats
 playback_effect <- as_tibble(fixef(m_alarm_v1), rownames = "term") |>
@@ -80,10 +81,9 @@ m_alarm_v2 <- brm(
   chains = 4,
   cores = 4,
   prior = priors,
-  iter = 4000
+  iter = 4000,
+  file = "models/m_alarm_v2"
 )
-
-saveRDS(m_alarm_v2, "models/m_alarm_v2.rds")
 
 #check model convergence
 summary(m_alarm_v2)
@@ -91,6 +91,7 @@ plot(m_alarm_v2)
 
 #check model fit
 pp_check(m_alarm_v2, type = "bars")
+check_collinearity(m_alarm_v2)
 
 hypotenuse_effect <- as_tibble(fixef(m_alarm_v2), rownames = "term") |>
   filter(grepl("HYPOTENUSE", term)) |>
@@ -111,10 +112,9 @@ m_alarm_final <- brm(
   chains = 4,
   cores = 4,
   prior = priors,
-  iter = 4000
+  iter = 4000,
+  file = "models/m_alarm_final"
 )
-
-saveRDS(m_alarm_final, "models/m_alarm_final.rds")
 
 #check model convergence
 summary(m_alarm_final)
@@ -197,64 +197,63 @@ plot2
 plot3 <- fitted_draws %>%
   mutate(TREATMENT = as.character(TREATMENT),
          SPECIES = as.character(SPECIES)) %>%
-  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
-  mutate(treatment_effect = HAWK - CONTROL) %>%
-  select(SPECIES, .draw, treatment_effect) %>%
-  pivot_wider(names_from = SPECIES, values_from = treatment_effect) %>%
-  mutate(interaction = ISSJ - CASJ) %>%
-  median_qi(interaction, .width = 0.95) %>%
-  ggplot(aes(x = "ISSJ − CASJ", y = interaction)) +
+  select(SPECIES, TREATMENT, .draw, .epred) %>%
+  pivot_wider(names_from = SPECIES, values_from = .epred) %>%
+  mutate(difference = CASJ - ISSJ) %>%
+  group_by(TREATMENT) %>%
+  median_qi(difference, .width = 0.95) %>%
+  ggplot(aes(x = TREATMENT, y = difference, color = TREATMENT)) +
   geom_point(size = 3) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper), width = 0.1) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper), width = 0.15) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
   scale_y_continuous(labels = scales::percent_format()) +
   labs(
-    y = "Difference in treatment effect (ISSJ − CASJ)",
-    x = "",
-    title = "Contrast of contrasts"
+    y = "Difference in alarm probability (CASJ − ISSJ)",
+    x = "Treatment",
+    color = "Treatment"
   ) +
-  theme_classic()
+  theme_classic() +
+  theme(legend.position = "none")
 
 plot3
 
-#compare difference of differences for treatment effect by species
-fitted_draws %>%
-  mutate(TREATMENT = as.character(TREATMENT),
-         SPECIES = as.character(SPECIES)) %>%
-  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
-  mutate(treatment_effect = HAWK - CONTROL) %>%
-  select(SPECIES, .draw, treatment_effect) %>%
-  pivot_wider(names_from = SPECIES, values_from = treatment_effect) %>%
-  mutate(interaction = ISSJ - CASJ) %>%
-  median_qi(interaction, .width = 0.95)
+# ── Plot 2 numerical summaries: treatment effect (HAWK - CONTROL) per species ──
 
+# Median and CI
 fitted_draws %>%
-  mutate(TREATMENT = as.character(TREATMENT),
-         SPECIES = as.character(SPECIES)) %>%
+  mutate(TREATMENT = as.character(TREATMENT)) %>%
   pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
-  mutate(treatment_effect = HAWK - CONTROL) %>%
-  select(SPECIES, .draw, treatment_effect) %>%
-  pivot_wider(names_from = SPECIES, values_from = treatment_effect) %>%
-  mutate(interaction = ISSJ - CASJ) %>%
-  summarise(p_greater = mean(interaction > 0))
+  mutate(difference = HAWK - CONTROL) %>%
+  group_by(SPECIES) %>%
+  median_qi(difference, .width = 0.95)
 
-#for treatments by species
+# Posterior probability treatment effect > 0 per species
+fitted_draws %>%
+  mutate(TREATMENT = as.character(TREATMENT)) %>%
+  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
+  mutate(difference = HAWK - CONTROL) %>%
+  group_by(SPECIES) %>%
+  summarise(p_greater = mean(difference > 0))
+
+
+# ── Plot 3 numerical summaries: species difference (CASJ - ISSJ) per treatment ──
+
 # Median and CI
 fitted_draws %>%
   mutate(TREATMENT = as.character(TREATMENT),
          SPECIES = as.character(SPECIES)) %>%
   select(SPECIES, TREATMENT, .draw, .epred) %>%
   pivot_wider(names_from = SPECIES, values_from = .epred) %>%
-  mutate(difference = ISSJ - CASJ) %>%
+  mutate(difference = CASJ - ISSJ) %>%
   group_by(TREATMENT) %>%
   median_qi(difference, .width = 0.95)
 
-# Posterior probability ISSJ > CASJ per treatment
+# Posterior probability CASJ > ISSJ per treatment
 fitted_draws %>%
   mutate(TREATMENT = as.character(TREATMENT),
          SPECIES = as.character(SPECIES)) %>%
   select(SPECIES, TREATMENT, .draw, .epred) %>%
   pivot_wider(names_from = SPECIES, values_from = .epred) %>%
-  mutate(difference = ISSJ - CASJ) %>%
+  mutate(difference = CASJ - ISSJ) %>%
   group_by(TREATMENT) %>%
   summarise(p_greater = mean(difference > 0))
