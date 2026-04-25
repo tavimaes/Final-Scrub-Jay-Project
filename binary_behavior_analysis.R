@@ -16,6 +16,7 @@ library(ggdist)
 library(brms)
 
 #read in clean data
+
 sjdf_clean <- read_csv("clean_data.csv")
 
 #set variables classes
