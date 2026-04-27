@@ -97,7 +97,7 @@ all_data %>%
     panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5)
   ) +
   scale_color_manual(
-    values = c("FALSE" = "gray50", "TRUE" = "red"),
+    values = c("FALSE" = "gray60", "TRUE" = "#E15759"),
     labels = c("FALSE" = "Not credible", "TRUE" = "Credible"),
     name = NULL
   ) +

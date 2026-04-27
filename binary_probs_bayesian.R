@@ -985,7 +985,7 @@ diff_scale <- scale_y_continuous(
   labels = scales::percent_format()
 )
 
-sig_color <- scale_color_manual(values = c("TRUE" = "red", "FALSE" = "gray60"))
+sig_color <- scale_color_manual(values = c("TRUE" = "#E15759", "FALSE" = "gray60"))
 
 # ---- PANEL A ----
 p1 <- all_draws %>%
@@ -998,7 +998,7 @@ p1 <- all_draws %>%
     aes(x = SPECIES, y = prop, fill = group, group = group),
     position = dodge,
     width = 0.7,
-    alpha = 0.2,   
+    alpha = 0.15,   
     inherit.aes = FALSE
   ) +
   geom_point(position = dodge, size = 2.5) +
@@ -1010,14 +1010,14 @@ p1 <- all_draws %>%
     position = dodge, vjust = -0.5, size = 3, inherit.aes = FALSE
   ) +
   scale_color_manual(values = c(
-    "CASJ.CONTROL" = "plum3", "CASJ.HAWK" = "darkorchid4",
-    "ISSJ.CONTROL" = "lightblue3", "ISSJ.HAWK" = "dodgerblue3"
+    "CASJ.CONTROL" = "#59A14F", "CASJ.HAWK" = "#4E79A7",
+    "ISSJ.CONTROL" = "#59A14F", "ISSJ.HAWK" = "#4E79A7"
   )) +
   scale_fill_manual(values = c(
-    "CASJ.CONTROL" = "plum3",
-    "CASJ.HAWK" = "darkorchid4",
-    "ISSJ.CONTROL" = "lightblue3",
-    "ISSJ.HAWK" = "dodgerblue3"
+    "CASJ.CONTROL" = "#59A14F",
+    "CASJ.HAWK" = "#4E79A7",
+    "ISSJ.CONTROL" = "#59A14F",
+    "ISSJ.HAWK" = "#4E79A7"
   )) +
   scale_y_continuous(
     limits = c(0, 1),
