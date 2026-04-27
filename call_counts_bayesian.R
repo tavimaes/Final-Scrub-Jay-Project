@@ -451,3 +451,6 @@ fitted_draws %>%
   mutate(difference = CASJ - ISSJ) %>%
   group_by(TREATMENT) %>%
   summarise(p_greater = mean(difference > 0))
+
+
+
