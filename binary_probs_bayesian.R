@@ -564,10 +564,11 @@ p2 <- all_draws %>%
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
-  theme(
+  theme(panel.spacing = unit(0.9, "cm"),
+        aspect.ratio = 1,
     axis.text   = element_text(size = 12),
     axis.title  = element_blank(),
-    plot.margin = margin(20, 2, 5, 2)
+    plot.margin = margin(20, 0, 5, 0)
   )
 
 #panel c: species difference (CASJ - ISSJ) per treatment
@@ -586,18 +587,17 @@ p3 <- all_draws %>%
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
-  theme(
+  theme(panel.spacing = unit(0.9, "cm"),
+        aspect.ratio = 1,
     axis.text    = element_text(size = 12),
     axis.title   = element_blank(),
-    axis.title.y = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    plot.margin  = margin(20, 2, 5, 2)
+    plot.margin  = margin(20, 0, 5, 0)
   )
+
 
 #save each panel separately for assembly in inkscape
 ggsave("fig4_a.png", p1, width = 4.5, height = 10, dpi = 300)
-ggsave("fig4_b.png", p2, width = 3.0, height = 10, dpi = 300)
-ggsave("fig4_c.png", p3, width = 3.0, height = 10, dpi = 300)
+ggsave("fig4_b.png", p2, width = 2.2, height = 10, dpi = 300)
+ggsave("fig4_c.png", p3, width = 2.2, height = 10, dpi = 300)
 
 
