@@ -589,6 +589,9 @@ p3 <- all_draws %>%
   theme(
     axis.text    = element_text(size = 12),
     axis.title   = element_blank(),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
     plot.margin  = margin(20, 2, 5, 2)
   )
 
