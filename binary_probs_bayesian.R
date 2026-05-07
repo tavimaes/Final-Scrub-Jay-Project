@@ -521,8 +521,8 @@ p1 <- all_draws %>%
   )) +
   scale_x_discrete(
     labels = c(
-      "CASJ" = expression(italic("A. californica")),
-      "ISSJ" = expression(italic("A. insularis"))
+      "CASJ" = expression(italic("californica")),
+      "ISSJ" = expression(italic("insularis"))
     ),
     expand = expansion(add = 0.3)  # reduce from default, lower = less padding
   ) +
@@ -545,7 +545,6 @@ diff_scale <- scale_y_continuous(
   limits = c(-0.75, 0.75),
   breaks = c(-0.75, -0.25, -0.50, 0, 0.25, 0.50, 0.75)
 )
-
 p2 <- all_draws %>%
   pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
   mutate(difference = HAWK - CONTROL) %>%
@@ -558,19 +557,17 @@ p2 <- all_draws %>%
   geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0.15) +
   sig_color + diff_scale +
   scale_x_discrete(labels = c(
-    "CASJ" = expression(italic("A. californica")),
-    "ISSJ" = expression(italic("A. insularis"))
+    "CASJ" = expression(italic("californica")),
+    "ISSJ" = expression(italic("insularis"))
   )) +
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
-  theme(panel.spacing = unit(0.9, "cm"),
-        aspect.ratio = 1,
+  theme(
     axis.text   = element_text(size = 12),
     axis.title  = element_blank(),
-    plot.margin = margin(20, 0, 5, 0)
+    plot.margin = margin(20, 2, 5, 2)
   )
-
 #panel c: species difference (CASJ - ISSJ) per treatment
 p3 <- all_draws %>%
   pivot_wider(names_from = SPECIES, values_from = .epred) %>%
@@ -587,11 +584,10 @@ p3 <- all_draws %>%
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
-  theme(panel.spacing = unit(0.9, "cm"),
-        aspect.ratio = 1,
+  theme(
     axis.text    = element_text(size = 12),
     axis.title   = element_blank(),
-    plot.margin  = margin(20, 0, 5, 0)
+    plot.margin  = margin(20, 2, 5, 2)
   )
 
 
