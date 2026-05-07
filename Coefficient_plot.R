@@ -120,7 +120,7 @@ all_data %>%
   )
 
 
-ggsave("fig4.png", last_plot(), width = 7, height = 5, dpi = 300)
+ggsave("fig3.png", last_plot(), width = 7, height = 5, dpi = 300)
 
 
 
