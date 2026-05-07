@@ -476,10 +476,6 @@ dodge      <- position_dodge(width = 0.8)
 diff_scale <- scale_y_continuous(limits = c(-0.75, 0.75), labels = scales::percent_format())
 sig_color  <- scale_color_manual(values = c("TRUE" = "#E15759", "FALSE" = "gray60"))
 
-tag_theme <- theme(
-  plot.tag          = element_text(face = "bold", size = 15),
-  plot.tag.position = c(0, 0.98)
-)
 
 common_theme <- theme_classic(base_size = 11) +
   theme(
@@ -501,9 +497,9 @@ p1 <- all_draws %>%
     aes(x = SPECIES, y = prop, fill = group, group = group),
     position = dodge, width = 0.7, alpha = 0.25, inherit.aes = FALSE
   ) +
-  geom_point(position = dodge, size = 2.5) +
+  geom_point(position = dodge, size = 5) +
   geom_errorbar(aes(ymin = .lower, ymax = .upper),
-                position = dodge, width = 0.15, linewidth = 0.6) +
+                position = dodge, width = 0, linewidth = 1.2) +
   geom_text(
     data = raw_proportions %>%
       mutate(group = interaction(SPECIES, TREATMENT)) %>%
@@ -521,29 +517,31 @@ p1 <- all_draws %>%
   )) +
   scale_x_discrete(
     labels = c(
-      "CASJ" = expression(italic("californica")),
-      "ISSJ" = expression(italic("insularis"))
+      "CASJ" = expression(italic("A.c.")),
+      "ISSJ" = expression(italic("A. i."))
     ),
-    expand = expansion(add = 0.3)  # reduce from default, lower = less padding
+    expand = expansion(add = 0.1)  # 
   ) +
   scale_y_continuous(
-    breaks = c(0, 0.25, 0.50, 0.75, 1.00),
-    expand = expansion(mult = c(0, 0.01))
+    breaks = c(0, 0.50, 1.00),
+    expand = expansion(mult = c(0, 0.04))
   ) +
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +  # y label removed, x set manually via scale
   coord_cartesian(clip = "off") +
   common_theme + tag_theme +
   theme(
-    axis.text  = element_text(size = 12),
+    axis.text.x  = element_text(size = 20),
+    axis.text.y = element_text(size = 18),
     axis.title = element_blank(),
+    axis.ticks.length = unit(0.2, "cm"),
     plot.margin = margin(20, 2, 5, 2)  # extra top margin
   )
 
 #panel b: treatment effect (hawk - control) per species
 diff_scale <- scale_y_continuous(
-  limits = c(-0.75, 0.75),
-  breaks = c(-0.75, -0.25, -0.50, 0, 0.25, 0.50, 0.75)
+  limits = c(-0.8, 0.8),
+  breaks = c(-0.8, -0.4, 0, 0.4, 0.8)
 )
 p2 <- all_draws %>%
   pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
@@ -553,18 +551,20 @@ p2 <- all_draws %>%
   mutate(significant = .lower > 0 | .upper < 0) %>%
   ggplot(aes(x = SPECIES, y = difference)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_point(aes(color = significant), size = 2.5) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0.15) +
+  geom_point(aes(color = significant), size = 5) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
   sig_color + diff_scale +
   scale_x_discrete(labels = c(
-    "CASJ" = expression(italic("californica")),
-    "ISSJ" = expression(italic("insularis"))
+    "CASJ" = expression(italic("A. c.")),
+    "ISSJ" = expression(italic("A. i."))
   )) +
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
   theme(
-    axis.text   = element_text(size = 12),
+    axis.text.x  = element_text(size = 20),
+    axis.text.y = element_text(size = 18),
+    axis.ticks.length = unit(0.2, "cm"),
     axis.title  = element_blank(),
     plot.margin = margin(20, 2, 5, 2)
   )
@@ -577,22 +577,24 @@ p3 <- all_draws %>%
   mutate(significant = .lower > 0 | .upper < 0) %>%
   ggplot(aes(x = TREATMENT, y = difference)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_point(aes(color = significant), size = 2.5) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0.15) +
+  geom_point(aes(color = significant), size = 5) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
   sig_color + diff_scale +
-  scale_x_discrete(labels = c("CONTROL" = "Control", "HAWK" = "Hawk")) +
+  scale_x_discrete(labels = c("CONTROL" = "C", "HAWK" = "H")) +
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
   theme(
-    axis.text    = element_text(size = 12),
+    axis.text.x  = element_text(size = 20),
+    axis.text.y = element_text(size = 18),
+    axis.ticks.length = unit(0.2, "cm"),
     axis.title   = element_blank(),
     plot.margin  = margin(20, 2, 5, 2)
   )
 
 
-#save each panel separately for assembly in inkscape
-ggsave("fig4_a.png", p1, width = 4.5, height = 10, dpi = 300)
+#save each panel separately for assembly 
+ggsave("fig4_a.png", p1, width = 2.2, height = 10, dpi = 300)
 ggsave("fig4_b.png", p2, width = 2.2, height = 10, dpi = 300)
 ggsave("fig4_c.png", p3, width = 2.2, height = 10, dpi = 300)
 
