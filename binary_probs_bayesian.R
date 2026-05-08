@@ -561,6 +561,7 @@ p2 <- all_draws %>%
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
+  coord_cartesian(clip = "off") +
   theme(
     axis.text.x  = element_text(size = 20),
     axis.text.y = element_text(size = 18),
@@ -584,6 +585,7 @@ p3 <- all_draws %>%
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
   common_theme + tag_theme +
+  coord_cartesian(clip = "off") +
   theme(
     axis.text.x  = element_text(size = 20),
     axis.text.y = element_text(size = 18),
