@@ -307,7 +307,7 @@ p1 <- ggplot() +
     data = raw_points,
     aes(x = SPECIES, y = value, group = group, fill = group),
     position = position_dodge(width = 0.8),
-    color = NA, alpha = 0.25, scale = "width"
+    color = NA, alpha = 0.15, scale = "width"
   ) +
   geom_jitter(
     data = raw_points,
@@ -318,17 +318,17 @@ p1 <- ggplot() +
   geom_point(
     data = model_summary,
     aes(x = SPECIES, y = .epred, group = group, color = group),
-    position = position_dodge(width = 0.8), size = 5
+    position = position_dodge(width = 0.8), size = 3
   ) +
   geom_errorbar(
     data = model_summary,
     aes(x = SPECIES, ymin = .lower, ymax = .upper, group = group, color = group),
-    position = position_dodge(width = 0.8), width = 0, linewidth = 1.2
+    position = position_dodge(width = 0.8), width = 0, linewidth = 1
   ) +
   geom_text(
     data = raw_counts %>% filter(model == "Alarm calls"),
     aes(x = SPECIES, y = Inf, label = n, group = group),
-    position = position_dodge(width = 0.8), vjust = -0.5, size = 6,
+    position = position_dodge(width = 0.8), vjust = -0.5, size = 3,
     color = "black"
   ) +
   scale_color_manual(values = group_colors) +
@@ -350,8 +350,8 @@ p1 <- ggplot() +
   coord_cartesian(clip = "off") +
   common_theme +
   theme(
-    axis.text.x       = element_text(size = 20),
-    axis.text.y       = element_text(size = 18),
+    axis.text.x       = element_text(size = 10),
+    axis.text.y       = element_text(size = 9),
     axis.title        = element_blank(),
     axis.ticks.length = unit(0.2, "cm"),
     plot.margin       = margin(20, 2, 5, 2)
@@ -367,8 +367,8 @@ p2 <- all_draws %>%
   mutate(significant = .lower > 0 | .upper < 0) %>%
   ggplot(aes(x = SPECIES, y = difference)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_point(aes(color = significant), size = 5) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
+  geom_point(aes(color = significant), size = 3) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1) +
   sig_color + count_diff_scale +
   scale_x_discrete(labels = c(
     "CASJ" = expression(italic("A. c.")),
@@ -379,8 +379,8 @@ p2 <- all_draws %>%
   coord_cartesian(clip = "off") +
   common_theme +
   theme(
-    axis.text.x       = element_text(size = 20),
-    axis.text.y       = element_text(size = 18),
+    axis.text.x       = element_text(size = 10),
+    axis.text.y       = element_text(size = 9),
     axis.title        = element_blank(),
     axis.ticks.length = unit(0.2, "cm"),
     plot.margin       = margin(20, 2, 5, 2)
@@ -395,8 +395,8 @@ p3 <- all_draws %>%
   mutate(significant = .lower > 0 | .upper < 0) %>%
   ggplot(aes(x = TREATMENT, y = difference)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_point(aes(color = significant), size = 5) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
+  geom_point(aes(color = significant), size = 3) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1) +
   sig_color + count_diff_scale +
   scale_x_discrete(labels = c("CONTROL" = "C", "HAWK" = "H")) +
   facet_wrap(~ model, ncol = 1) +
@@ -404,15 +404,15 @@ p3 <- all_draws %>%
   coord_cartesian(clip = "off") +
   common_theme +
   theme(
-    axis.text.x       = element_text(size = 20),
-    axis.text.y       = element_text(size = 18),
+    axis.text.x       = element_text(size = 10),
+    axis.text.y       = element_text(size = 9),
     axis.title        = element_blank(),
     axis.ticks.length = unit(0.2, "cm"),
     plot.margin       = margin(20, 2, 5, 2)
   )
 
 #save each panel separately
-ggsave("fig5_a.png", p1, width = 2.2, height = 7, dpi = 300)
-ggsave("fig5_b.png", p2, width = 2.2, height = 7, dpi = 300)
-ggsave("fig5_c.png", p3, width = 2.2, height = 7, dpi = 300)
+ggsave("fig5_a.png", p1, width = 2.2, height = 4, dpi = 300)
+ggsave("fig5_b.png", p2, width = 2.2, height = 4, dpi = 300)
+ggsave("fig5_c.png", p3, width = 2.2, height = 4, dpi = 300)
 
