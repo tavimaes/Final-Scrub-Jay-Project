@@ -413,6 +413,6 @@ p3 <- all_draws %>%
 
 #save each panel separately
 ggsave("fig5_a.png", p1, width = 2.2, height = 4, dpi = 300)
-ggsave("fig5_b.png", p2, width = 2.2, height = 4, dpi = 300)
-ggsave("fig5_c.png", p3, width = 2.2, height = 4, dpi = 300)
+ggsave("fig5_b.png", p2, width = 1.3, height = 4, dpi = 300)
+ggsave("fig5_c.png", p3, width = 1.3, height = 4, dpi = 300)
 
