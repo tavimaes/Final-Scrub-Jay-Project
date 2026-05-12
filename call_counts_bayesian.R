@@ -264,7 +264,7 @@ raw_points <- bind_rows(
     group     = as.character(interaction(SPECIES, TREATMENT, sep = "."))
   )
 
-#sample counts for panel a labels
+#sample counts for panel a labels — only shown on first facet
 raw_counts <- raw_points %>%
   group_by(model, SPECIES, TREATMENT) %>%
   summarise(n = n(), .groups = "drop") %>%
@@ -278,23 +278,12 @@ model_summary <- all_draws %>%
   ungroup()
 
 #shared plot elements
-dodge      <- position_dodge(width = 0.8)
-sig_color  <- scale_color_manual(values = c("TRUE" = "#E15759", "FALSE" = "gray60"))
-
-#shared y scale for panels b and c — adjust limits to data range
-count_diff_scale <- scale_y_continuous(
-  limits = c(-5, 35),
-  labels = scales::label_number()
-)
+dodge     <- position_dodge(width = 0.8)
+sig_color <- scale_color_manual(values = c("TRUE" = "#E15759", "FALSE" = "gray60"))
 
 group_colors <- c(
   "CASJ.CONTROL" = "#59A14F", "CASJ.HAWK" = "#4E79A7",
   "ISSJ.CONTROL" = "#59A14F", "ISSJ.HAWK" = "#4E79A7"
-)
-
-tag_theme <- theme(
-  plot.tag          = element_text(face = "bold", size = 15),
-  plot.tag.position = c(0, 0.98)
 )
 
 common_theme <- theme_classic(base_size = 11) +
@@ -305,6 +294,12 @@ common_theme <- theme_classic(base_size = 11) +
     panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
     legend.position  = "none"
   )
+
+#shared difference scale for panels b and c
+count_diff_scale <- scale_y_continuous(
+  limits = c(-5, 35),
+  labels = scales::label_number()
+)
 
 #panel a: raw data violin + jitter with model estimates overlaid
 p1 <- ggplot() +
@@ -323,29 +318,44 @@ p1 <- ggplot() +
   geom_point(
     data = model_summary,
     aes(x = SPECIES, y = .epred, group = group, color = group),
-    position = position_dodge(width = 0.8), size = 2.8
+    position = position_dodge(width = 0.8), size = 5
   ) +
   geom_errorbar(
     data = model_summary,
     aes(x = SPECIES, ymin = .lower, ymax = .upper, group = group, color = group),
-    position = position_dodge(width = 0.8), width = 0.15, linewidth = 0.7
+    position = position_dodge(width = 0.8), width = 0, linewidth = 1.2
   ) +
   geom_text(
-    data = raw_counts,
-    aes(x = SPECIES, y = Inf, label = n, group = group, color = group),
-    position = position_dodge(width = 0.8), vjust = -0.3, size = 2.8
+    data = raw_counts %>% filter(model == "Alarm calls"),
+    aes(x = SPECIES, y = Inf, label = n, group = group),
+    position = position_dodge(width = 0.8), vjust = -0.5, size = 6,
+    color = "black"
   ) +
   scale_color_manual(values = group_colors) +
   scale_fill_manual(values  = group_colors) +
+  scale_x_discrete(
+    labels = c(
+      "CASJ" = expression(italic("A. c.")),
+      "ISSJ" = expression(italic("A. i."))
+    ),
+    expand = expansion(add = 0.1)
+  ) +
   scale_y_continuous(
-    trans = "pseudo_log",
-    labels = scales::label_number(),
-    expand = expansion(mult = c(0.02, 0.1))
+    trans   = "pseudo_log",
+    labels  = scales::label_number(),
+    expand  = expansion(mult = c(0.02, 0.04))
   ) +
   facet_wrap(~ model, ncol = 1, scales = "free_y") +
-  labs(y = "Number of calls", x = "Species", tag = "a)") +
+  labs(x = NULL, y = NULL) +
   coord_cartesian(clip = "off") +
-  common_theme + tag_theme
+  common_theme +
+  theme(
+    axis.text.x       = element_text(size = 20),
+    axis.text.y       = element_text(size = 18),
+    axis.title        = element_blank(),
+    axis.ticks.length = unit(0.2, "cm"),
+    plot.margin       = margin(20, 2, 5, 2)
+  )
 
 #panel b: treatment effect (hawk - control) per species
 #red = CI excludes zero
@@ -357,15 +367,26 @@ p2 <- all_draws %>%
   mutate(significant = .lower > 0 | .upper < 0) %>%
   ggplot(aes(x = SPECIES, y = difference)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_point(aes(color = significant), size = 2.5) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0.15) +
+  geom_point(aes(color = significant), size = 5) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
   sig_color + count_diff_scale +
+  scale_x_discrete(labels = c(
+    "CASJ" = expression(italic("A. c.")),
+    "ISSJ" = expression(italic("A. i."))
+  )) +
   facet_wrap(~ model, ncol = 1) +
-  labs(y = "Difference in count by treatment (Hawk − Control)", x = "Species", tag = "b)") +
-  common_theme + tag_theme
+  labs(x = NULL, y = NULL) +
+  coord_cartesian(clip = "off") +
+  common_theme +
+  theme(
+    axis.text.x       = element_text(size = 20),
+    axis.text.y       = element_text(size = 18),
+    axis.title        = element_blank(),
+    axis.ticks.length = unit(0.2, "cm"),
+    plot.margin       = margin(20, 2, 5, 2)
+  )
 
 #panel c: species difference (CASJ - ISSJ) per treatment
-#y axis removed to avoid redundancy with panel b
 p3 <- all_draws %>%
   pivot_wider(names_from = SPECIES, values_from = .epred) %>%
   mutate(difference = CASJ - ISSJ) %>%
@@ -374,17 +395,24 @@ p3 <- all_draws %>%
   mutate(significant = .lower > 0 | .upper < 0) %>%
   ggplot(aes(x = TREATMENT, y = difference)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
-  geom_point(aes(color = significant), size = 2.5) +
-  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0.15) +
+  geom_point(aes(color = significant), size = 5) +
+  geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
   sig_color + count_diff_scale +
+  scale_x_discrete(labels = c("CONTROL" = "C", "HAWK" = "H")) +
   facet_wrap(~ model, ncol = 1) +
-  labs(y = "Difference in count by species (CASJ − ISSJ)", x = "Treatment", tag = "c)") +
-  common_theme + tag_theme +
-  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  labs(x = NULL, y = NULL) +
+  coord_cartesian(clip = "off") +
+  common_theme +
+  theme(
+    axis.text.x       = element_text(size = 20),
+    axis.text.y       = element_text(size = 18),
+    axis.title        = element_blank(),
+    axis.ticks.length = unit(0.2, "cm"),
+    plot.margin       = margin(20, 2, 5, 2)
+  )
 
-#combine and save
-final_plot <- (p1 | p2 | p3) + plot_layout(widths = c(2.2, 1.2, 1.2))
+#save each panel separately
+ggsave("fig5_a.png", p1, width = 2.2, height = 7, dpi = 300)
+ggsave("fig5_b.png", p2, width = 2.2, height = 7, dpi = 300)
+ggsave("fig5_c.png", p3, width = 2.2, height = 7, dpi = 300)
 
-final_plot
-
-ggsave("fig6.png", final_plot, width = 10, height = 7, dpi = 300)
