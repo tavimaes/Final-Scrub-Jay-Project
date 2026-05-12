@@ -1,31 +1,38 @@
-####This script is for making a coefficient plot for all models
+####----Coefficient plot for all models----
 
-#load packages
 library(tidyverse)
 library(ggplot2)
-library(dplyr)
 
-#read in data for all models
+#read in and combine all model coefficients
+all_data <- bind_rows(
+  read.csv("alarm_prob_coefs.csv"),
+  read.csv("mob_prob_coefs.csv"),
+  read.csv("interest_prob_coefs.csv"),
+  read.csv("flee_prob_coefs.csv"),
+  read.csv("number_alarm_coefs.csv"),
+  read.csv("number_mob_coefs.csv")
+) %>%
+  mutate(
+    significant = lower > 0 | upper < 0,
+    model = factor(model, levels = c(
+      "alarm_prob", "mob_prob", "flee_prob",
+      "interest_prob", "number_alarm", "number_mob"
+    )),
+    term = factor(as.character(term),
+                  levels = c(
+                    "PLAYBACKYES", "HYPOTENUSE", "SEASONWINTER",
+                    "GROUP.SIZE", "SPECIESISSJ:TREATMENTHAWK",
+                    "TREATMENTHAWK", "SPECIESISSJ"
+                  ),
+                  labels = c(
+                    "Playback*", "Hypotenuse*", "Season (Winter)",
+                    "Group Size", "Species × Treatment",
+                    "Treatment (Hawk)", "Species (A. insularis)"
+                  )
+    )
+  )
 
-alarm_prob_data <- read.csv("alarm_prob_coefs.csv")
-mob_prob_data <- read.csv("mob_prob_coefs.csv")
-interest_prob_data <- read.csv("interest_prob_coefs.csv")
-flee_prob_data <- read.csv("flee_prob_coefs.csv")
-alarm_call_data <- read.csv("number_alarm_coefs.csv")
-mob_call_data <- read.csv("number_mob_coefs.csv")
-
-#bind all dataframes
-
-all_data <- bind_rows(alarm_prob_data, mob_prob_data, interest_prob_data, 
-                      flee_prob_data, alarm_call_data, mob_call_data)
-
-
-#clean data titles
-
-
-
-#plot
-
+#panel labels
 panel_labels <- data.frame(
   model = factor(
     c("alarm_prob", "mob_prob", "flee_prob",
@@ -36,96 +43,106 @@ panel_labels <- data.frame(
   label = c("a)", "b)", "c)", "d)", "e)", "f)")
 )
 
-all_data <- all_data %>%
-  mutate(term = as.factor(term))
+#plot
+ggplot(all_data, aes(x = estimate, y = term, color = significant)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_point(size = 2) +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), width = 0, linewidth = 1) +
+  geom_text(
+    data = panel_labels,
+    aes(label = label, x = -Inf, y = Inf, size = 5),
+    hjust = -0.3, vjust = 1.5,
+    color = "black", fontface = "bold",
+    inherit.aes = FALSE
+  ) +
+  scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#E15759")) +
+  scale_x_continuous(
+    breaks = c(-3, 0, 3)) +
+  facet_wrap(~ model, scales = "fixed") +
+  theme_classic() +
+  scale_y_discrete(expand = expansion(add = c(0.5, 1.5))) +
+  theme(
+    legend.position  = "none",
+    strip.text       = element_blank(),
+    strip.background = element_blank(),
+    panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
+    axis.text.x      = element_text(size = 14),
+    axis.text.y      = element_text(size = 14),
+    axis.title       = element_blank()
+  )
 
-n_terms <- nlevels(all_data$term)
+ggsave("fig3.png", last_plot(), width = 8, height = 5, dpi = 300)
 
-band_data <- data.frame(
-  ymin = seq(0.5, n_terms - 0.5, by = 1),
-  ymax = seq(1.5, n_terms + 0.5, by = 1),
-  fill = rep(c("gray95", "white"), length.out = n_terms)
-)
+####----Coefficient plot — flipped layout, 6 stacked panels----
 
+library(tidyverse)
+library(ggplot2)
 
-all_data %>%
+#read in and combine all model coefficients
+all_data <- bind_rows(
+  read.csv("alarm_prob_coefs.csv"),
+  read.csv("mob_prob_coefs.csv"),
+  read.csv("interest_prob_coefs.csv"),
+  read.csv("flee_prob_coefs.csv"),
+  read.csv("number_alarm_coefs.csv"),
+  read.csv("number_mob_coefs.csv")
+) %>%
   mutate(
     significant = lower > 0 | upper < 0,
     model = factor(model, levels = c(
       "alarm_prob", "mob_prob", "flee_prob",
       "interest_prob", "number_alarm", "number_mob"
     )),
-    term = factor(term,
+    # reversed order so Species (A. insularis) appears at top
+    term = factor(as.character(term),
                   levels = c(
-                    "PLAYBACKYES",
-                    "HYPOTENUSE",
-                    "SEASONWINTER",
-                    "GROUP.SIZE",
-                    "SPECIESISSJ:TREATMENTHAWK",
-                    "TREATMENTHAWK",
-                    "SPECIESISSJ"
+                    "SPECIESISSJ", "TREATMENTHAWK", "SPECIESISSJ:TREATMENTHAWK",
+                    "GROUP.SIZE", "SEASONWINTER", "HYPOTENUSE", "PLAYBACKYES"
                   ),
                   labels = c(
-                    "Playback*",
-                    "Hypotenuse*",
-                    "Season (Winter)",
-                    "Group Size",
-                    "Species × Treatment",
-                    "Treatment (Hawk)",
-                    "Species (A. insularis)"
+                    "Species (A. insularis)", "Treatment (Hawk)", "Species × Treatment",
+                    "Group Size", "Season (Winter)", "Hypotenuse*", "Playback*"
                   )
     )
-  ) %>%
-  ggplot(aes(x = estimate, y = term, color = significant)) +
-  geom_rect(
-    data = band_data,
-    aes(ymin = ymin, ymax = ymax, fill = fill),
-    xmin = -Inf, xmax = Inf,
-    inherit.aes = FALSE
-  ) +
-  scale_fill_identity(guide = "none") +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  )
+
+#panel labels
+panel_labels <- data.frame(
+  model = factor(
+    c("alarm_prob", "mob_prob", "flee_prob",
+      "interest_prob", "number_alarm", "number_mob"),
+    levels = c("alarm_prob", "mob_prob", "flee_prob",
+               "interest_prob", "number_alarm", "number_mob")
+  ),
+  label = c("a)", "b)", "c)", "d)", "e)", "f)")
+)
+
+ggplot(all_data, aes(x = term, y = estimate, color = significant)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
   geom_point(size = 2) +
-  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.3) +
-  scale_color_manual(values = c("FALSE" = "gray50", "TRUE" = "red")) +
-  facet_wrap(~ model, scales = "fixed") +
-  theme_classic() +
-  theme(
-    legend.position = "none",
-    strip.text = element_blank(),
-    strip.background = element_blank(),
-    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5)
-  ) +
-  scale_color_manual(
-    values = c("FALSE" = "gray60", "TRUE" = "#E15759"),
-    labels = c("FALSE" = "Not credible", "TRUE" = "Credible"),
-    name = NULL
-  ) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0, linewidth = 1) +
   geom_text(
     data = panel_labels,
     aes(label = label, x = -Inf, y = Inf),
-    hjust = -0.3,
-    vjust = 1.5,
-    color = "black",
-    fontface = "bold",
+    hjust = -0.3, vjust = 1.5,
+    color = "black", fontface = "bold", size = 5,
     inherit.aes = FALSE
   ) +
-  scale_y_discrete(expand = expansion(add = c(0.5, 1))) +
+  scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#E15759")) +
+  scale_y_continuous(breaks = c(-3, 0, 3), limits = c(-5, 5)) +
+  scale_x_discrete(expand = expansion(add = c(0.5, 1.5))) +
+  facet_wrap(~ model, scales = "fixed", ncol = 1) +
+  theme_classic() +
   theme(
-    legend.position = "bottom"
-  ) +
-  labs(
-    x = "Effect size (log-odds or log-count)",
-    y = "Predictor"
+    legend.position  = "none",
+    strip.text       = element_blank(),
+    strip.background = element_blank(),
+    panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
+    panel.spacing    = unit(0.5, "cm"),
+    axis.text.x      = element_text(size = 14, angle = 45, hjust = 1),
+    axis.text.y      = element_text(size = 14),
+    axis.title       = element_blank()
   )
 
-
-ggsave("fig3.png", last_plot(), width = 7, height = 5, dpi = 300)
-
-
-
-
-
-
-
+ggsave("fig3_flipped.png", last_plot(), width = 5, height = 10, dpi = 300)
 
