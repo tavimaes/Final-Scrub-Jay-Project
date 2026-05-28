@@ -118,6 +118,27 @@ fitted_draws %>%
   group_by(SPECIES) %>%
   summarise(p_greater = mean(difference > 0))
 
+#difference of differences
+fitted_draws %>%
+  mutate(TREATMENT = as.character(TREATMENT),
+         SPECIES   = as.character(SPECIES)) %>%
+  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
+  mutate(difference = HAWK - CONTROL) %>%
+  select(SPECIES, .draw, difference) %>%
+  pivot_wider(names_from = SPECIES, values_from = difference) %>%
+  mutate(diff_of_diffs = CASJ - ISSJ) %>%
+  median_qi(diff_of_diffs, .width = 0.95)
+
+fitted_draws %>%
+  mutate(TREATMENT = as.character(TREATMENT),
+         SPECIES   = as.character(SPECIES)) %>%
+  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
+  mutate(difference = HAWK - CONTROL) %>%
+  select(SPECIES, .draw, difference) %>%
+  pivot_wider(names_from = SPECIES, values_from = difference) %>%
+  mutate(diff_of_diffs = CASJ - ISSJ) %>%
+  summarise(p_greater = mean(diff_of_diffs > 0))
+
 #numerical summaries: species difference (CASJ - ISSJ) per treatment
 fitted_draws %>%
   mutate(TREATMENT = as.character(TREATMENT), SPECIES = as.character(SPECIES)) %>%
@@ -222,6 +243,27 @@ fitted_draws %>%
   mutate(difference = HAWK - CONTROL) %>%
   group_by(SPECIES) %>%
   summarise(p_greater = mean(difference > 0))
+
+#difference of differences
+fitted_draws %>%
+  mutate(TREATMENT = as.character(TREATMENT),
+         SPECIES   = as.character(SPECIES)) %>%
+  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
+  mutate(difference = HAWK - CONTROL) %>%
+  select(SPECIES, .draw, difference) %>%
+  pivot_wider(names_from = SPECIES, values_from = difference) %>%
+  mutate(diff_of_diffs = CASJ - ISSJ) %>%
+  median_qi(diff_of_diffs, .width = 0.95)
+
+fitted_draws %>%
+  mutate(TREATMENT = as.character(TREATMENT),
+         SPECIES   = as.character(SPECIES)) %>%
+  pivot_wider(names_from = TREATMENT, values_from = .epred) %>%
+  mutate(difference = HAWK - CONTROL) %>%
+  select(SPECIES, .draw, difference) %>%
+  pivot_wider(names_from = SPECIES, values_from = difference) %>%
+  mutate(diff_of_diffs = CASJ - ISSJ) %>%
+  summarise(p_greater = mean(diff_of_diffs > 0))
 
 #numerical summaries: species difference (CASJ - ISSJ) per treatment
 fitted_draws %>%
