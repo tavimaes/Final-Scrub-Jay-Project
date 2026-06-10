@@ -565,7 +565,7 @@ common_theme <- theme_classic(base_size = 11) +
   theme(
     strip.background = element_blank(),
     strip.text       = element_blank(),
-    panel.spacing    = unit(0.9, "cm"),
+    panel.spacing    = unit(2, "cm"),
     panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
     legend.position  = "none"
   )
@@ -601,8 +601,8 @@ p1 <- all_draws %>%
   )) +
   scale_x_discrete(
     labels = c(
-      "CASJ" = expression(italic("A.c.")),
-      "ISSJ" = expression(italic("A. i."))
+      "CASJ" = expression("A. californica"),
+      "ISSJ" = expression("A. insularis")
     ),
     expand = expansion(add = 0.1)  # 
   ) +
@@ -613,9 +613,9 @@ p1 <- all_draws %>%
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +  # y label removed, x set manually via scale
   coord_cartesian(clip = "off") +
-  common_theme + tag_theme +
+  common_theme +
   theme(
-    axis.text.x  = element_text(size = 20),
+    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1),
     axis.text.y = element_text(size = 18),
     axis.title = element_blank(),
     axis.ticks.length = unit(0.2, "cm"),
@@ -639,15 +639,15 @@ p2 <- all_draws %>%
   geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
   sig_color + diff_scale +
   scale_x_discrete(labels = c(
-    "CASJ" = expression(italic("A. c.")),
-    "ISSJ" = expression(italic("A. i."))
+    "CASJ" = expression("A. californica"),
+    "ISSJ" = expression("A. insularis")
   )) +
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
-  common_theme + tag_theme +
+  common_theme +
   coord_cartesian(clip = "off") +
   theme(
-    axis.text.x  = element_text(size = 20),
+    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1),
     axis.text.y = element_text(size = 18),
     axis.ticks.length = unit(0.2, "cm"),
     axis.title  = element_blank(),
@@ -665,13 +665,13 @@ p3 <- all_draws %>%
   geom_point(aes(color = significant), size = 5) +
   geom_errorbar(aes(ymin = .lower, ymax = .upper, color = significant), width = 0, linewidth = 1.2) +
   sig_color + diff_scale +
-  scale_x_discrete(labels = c("CONTROL" = "C", "HAWK" = "H")) +
+  scale_x_discrete(labels = c("CONTROL" = "A. californica", "HAWK" = "Hawk")) +
   facet_wrap(~ model, ncol = 1) +
   labs(x = NULL, y = NULL) +
-  common_theme + tag_theme +
+  common_theme +
   coord_cartesian(clip = "off") +
   theme(
-    axis.text.x  = element_text(size = 20),
+    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1),
     axis.text.y = element_text(size = 18),
     axis.ticks.length = unit(0.2, "cm"),
     axis.title   = element_blank(),
