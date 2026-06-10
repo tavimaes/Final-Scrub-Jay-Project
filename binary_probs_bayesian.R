@@ -615,10 +615,11 @@ p1 <- all_draws %>%
   coord_cartesian(clip = "off") +
   common_theme +
   theme(
-    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1),
+    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1,
+                                margin = margin(t = 15)),
     axis.text.y = element_text(size = 18),
     axis.title = element_blank(),
-    axis.ticks.length = unit(0.2, "cm"),
+    axis.ticks.length = unit(0.3, "cm"),
     plot.margin = margin(20, 2, 5, 2)  # extra top margin
   )
 
@@ -647,9 +648,10 @@ p2 <- all_draws %>%
   common_theme +
   coord_cartesian(clip = "off") +
   theme(
-    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1),
+    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1,
+                                margin = margin(t = 15)),
     axis.text.y = element_text(size = 18),
-    axis.ticks.length = unit(0.2, "cm"),
+    axis.ticks.length = unit(0.3, "cm"),
     axis.title  = element_blank(),
     plot.margin = margin(20, 2, 5, 2)
   )
@@ -671,9 +673,10 @@ p3 <- all_draws %>%
   common_theme +
   coord_cartesian(clip = "off") +
   theme(
-    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1),
+    axis.text.x  = element_text(size = 20, angle = 60, hjust = 1,
+                                margin = margin(t = 15)),
     axis.text.y = element_text(size = 18),
-    axis.ticks.length = unit(0.2, "cm"),
+    axis.ticks.length = unit(0.3, "cm"),
     axis.title   = element_blank(),
     plot.margin  = margin(20, 2, 5, 2)
   )
