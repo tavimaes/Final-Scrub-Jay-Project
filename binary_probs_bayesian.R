@@ -591,7 +591,7 @@ p1 <- all_draws %>%
       mutate(group = interaction(SPECIES, TREATMENT)) %>%
       filter(model == "Alarm"),
     aes(x = SPECIES, y = Inf, label = n, group = group),
-    position = dodge, vjust = 1, size = 6, inherit.aes = FALSE
+    position = dodge, vjust = -0.5, size = 6, inherit.aes = FALSE
   ) +
   scale_color_manual(values = c(
     "CASJ.CONTROL" = "#59A14F", "CASJ.HAWK" = "#4E79A7",
