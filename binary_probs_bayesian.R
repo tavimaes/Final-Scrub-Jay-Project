@@ -589,7 +589,7 @@ p1 <- all_draws %>%
       mutate(group = interaction(SPECIES, TREATMENT)) %>%
       filter(model == "Alarm"),
     aes(x = SPECIES, y = Inf, label = n, group = group),
-    position = dodge, vjust = 2, size = 6, inherit.aes = FALSE
+    position = dodge, vjust = 1, size = 6, inherit.aes = FALSE
   ) +
   scale_color_manual(values = c(
     "CASJ.CONTROL" = "#59A14F", "CASJ.HAWK" = "#4E79A7",
@@ -620,7 +620,8 @@ p1 <- all_draws %>%
     axis.text.y = element_text(size = 18),
     axis.title = element_blank(),
     axis.ticks.length = unit(0.3, "cm"),
-    plot.margin = margin(20, 2, 5, 2)  # extra top margin
+    plot.margin = margin(20, 2, 5, 2),
+    plot.background = element_rect(fill = "transparent", color = NA)
   )
 
 #panel b: treatment effect (hawk - control) per species
@@ -653,7 +654,8 @@ p2 <- all_draws %>%
     axis.text.y = element_text(size = 18),
     axis.ticks.length = unit(0.3, "cm"),
     axis.title  = element_blank(),
-    plot.margin = margin(20, 2, 5, 2)
+    plot.margin = margin(20, 2, 5, 2),
+    plot.background = element_rect(fill = "transparent", color = NA)
   )
 #panel c: species difference (CASJ - ISSJ) per treatment
 p3 <- all_draws %>%
@@ -678,7 +680,8 @@ p3 <- all_draws %>%
     axis.text.y = element_text(size = 18),
     axis.ticks.length = unit(0.3, "cm"),
     axis.title   = element_blank(),
-    plot.margin  = margin(20, 2, 5, 2)
+    plot.margin  = margin(20, 2, 5, 2),
+    plot.background = element_rect(fill = "transparent", color = NA)
   )
 
 
