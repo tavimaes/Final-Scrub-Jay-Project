@@ -567,7 +567,8 @@ common_theme <- theme_classic(base_size = 11) +
     strip.text       = element_blank(),
     panel.spacing    = unit(2, "cm"),
     panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
-    legend.position  = "none"
+    legend.position  = "none",
+    plot.background  = element_rect(fill = "transparent", color = NA),
   )
 
 #panel a: predicted probabilities with raw data bars and sample sizes
@@ -620,8 +621,7 @@ p1 <- all_draws %>%
     axis.text.y = element_text(size = 18),
     axis.title = element_blank(),
     axis.ticks.length = unit(0.3, "cm"),
-    plot.margin = margin(20, 2, 5, 2),
-    plot.background = element_rect(fill = "transparent", color = NA)
+    plot.margin = margin(20, 2, 5, 2)
   )
 
 #panel b: treatment effect (hawk - control) per species
@@ -654,8 +654,7 @@ p2 <- all_draws %>%
     axis.text.y = element_text(size = 18),
     axis.ticks.length = unit(0.3, "cm"),
     axis.title  = element_blank(),
-    plot.margin = margin(20, 2, 5, 2),
-    plot.background = element_rect(fill = "transparent", color = NA)
+    plot.margin = margin(20, 2, 5, 2)
   )
 #panel c: species difference (CASJ - ISSJ) per treatment
 p3 <- all_draws %>%
@@ -680,8 +679,7 @@ p3 <- all_draws %>%
     axis.text.y = element_text(size = 18),
     axis.ticks.length = unit(0.3, "cm"),
     axis.title   = element_blank(),
-    plot.margin  = margin(20, 2, 5, 2),
-    plot.background = element_rect(fill = "transparent", color = NA)
+    plot.margin  = margin(20, 2, 5, 2)
   )
 
 
