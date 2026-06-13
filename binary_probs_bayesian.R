@@ -569,6 +569,7 @@ common_theme <- theme_classic(base_size = 11) +
     panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
     legend.position  = "none",
     plot.background  = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
   )
 
 #panel a: predicted probabilities with raw data bars and sample sizes
