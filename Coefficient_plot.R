@@ -106,28 +106,13 @@ all_data <- bind_rows(
     )
   )
 
-#panel labels
-panel_labels <- data.frame(
-  model = factor(
-    c("alarm_prob", "mob_prob", "flee_prob",
-      "interest_prob", "number_alarm", "number_mob"),
-    levels = c("alarm_prob", "mob_prob", "flee_prob",
-               "interest_prob", "number_alarm", "number_mob")
-  ),
-  label = c("a)", "b)", "c)", "d)", "e)", "f)")
-)
 
 ggplot(all_data, aes(x = term, y = estimate, color = significant)) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
   geom_point(size = 2) +
   geom_errorbar(aes(ymin = lower, ymax = upper), width = 0, linewidth = 1) +
-  geom_text(
-    data = panel_labels,
-    aes(label = label, x = -Inf, y = Inf),
-    hjust = -0.3, vjust = 1.5,
-    color = "black", fontface = "bold", size = 5,
-    inherit.aes = FALSE
-  ) +
+  
+
   scale_color_manual(values = c("FALSE" = "gray60", "TRUE" = "#E15759")) +
   scale_y_continuous(breaks = c(-3, 0, 3), limits = c(-5, 5)) +
   scale_x_discrete(expand = expansion(add = c(0.5, 1.5))) +

@@ -589,7 +589,7 @@ p1 <- all_draws %>%
       mutate(group = interaction(SPECIES, TREATMENT)) %>%
       filter(model == "Alarm"),
     aes(x = SPECIES, y = Inf, label = n, group = group),
-    position = dodge, vjust = -0.5, size = 6, inherit.aes = FALSE
+    position = dodge, vjust = 2, size = 6, inherit.aes = FALSE
   ) +
   scale_color_manual(values = c(
     "CASJ.CONTROL" = "#59A14F", "CASJ.HAWK" = "#4E79A7",
@@ -683,8 +683,8 @@ p3 <- all_draws %>%
 
 
 #save each panel separately for assembly 
-ggsave("fig4_a.png", p1, width = 2.2, height = 10, dpi = 300)
-ggsave("fig4_b.png", p2, width = 2.2, height = 10, dpi = 300)
-ggsave("fig4_c.png", p3, width = 2.2, height = 10, dpi = 300)
+ggsave("fig4_a.png", p1, width = 2.2, height = 10, dpi = 300, bg = "transparent")
+ggsave("fig4_b.png", p2, width = 2.2, height = 10, dpi = 300, bg = "transparent")
+ggsave("fig4_c.png", p3, width = 2.2, height = 10, dpi = 300, bg = "transparent")
 
 
