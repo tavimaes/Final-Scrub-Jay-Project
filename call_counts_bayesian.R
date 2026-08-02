@@ -334,7 +334,13 @@ common_theme <- theme_classic(base_size = 11) +
     strip.text       = element_blank(),
     panel.spacing    = unit(0.9, "cm"),
     panel.border     = element_rect(color = "black", fill = NA, linewidth = 0.5),
-    legend.position  = "none"
+    legend.position  = "none",
+    
+    # Transparent backgrounds
+    panel.background = element_rect(fill = "transparent", colour = NA),
+    plot.background  = element_rect(fill = "transparent", colour = NA),
+    legend.background = element_rect(fill = "transparent", colour = NA),
+    legend.box.background = element_rect(fill = "transparent", colour = NA)
   )
 
 #shared difference scale for panels b and c
@@ -454,7 +460,17 @@ p3 <- all_draws %>%
   )
 
 #save each panel separately
-ggsave("fig5_a.png", p1, width = 2.2, height = 4, dpi = 300)
-ggsave("fig5_b.png", p2, width = 1.3, height = 4, dpi = 300)
-ggsave("fig5_c.png", p3, width = 1.3, height = 4, dpi = 300)
+ggsave("fig5_a.png", p1,
+       width = 2.2, height = 4, dpi = 300,
+       bg = "transparent")
+
+ggsave("fig5_b.png", p2,
+       width = 1.3, height = 4, dpi = 300,
+       bg = "transparent")
+
+ggsave("fig5_c.png", p3,
+       width = 1.3, height = 4, dpi = 300,
+       bg = "transparent")
+
+#done
 
